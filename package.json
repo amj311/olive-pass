@@ -9,6 +9,7 @@
   "author": "amj311 <contact@arthurjudd.com> (arthurjudd.com)",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "expess": "0.0.1-security"
   }
 }

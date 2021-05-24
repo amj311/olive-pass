@@ -1,0 +1,14 @@
+{
+  "name": "olive-pass",
+  "version": "1.0.0",
+  "description": "",
+  "main": "crypt.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "amj311 <contact@arthurjudd.com> (arthurjudd.com)",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}

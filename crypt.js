@@ -34,3 +34,7 @@ module.exports.decrypt = (hash) => {
   if (decrypted.startsWith("$op")) decrypted = JSON.parse(decrypted.split("$op")[1])
   return decrypted;
 };
+
+module.exports.compare = function(data, hash) {
+  return data === module.exports.decrypt(hash);
+}

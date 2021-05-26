@@ -28,11 +28,21 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   store: store,
-  cookie: { maxAge: Constants.SessionDuration }
+  cookie: { 
+    maxAge: Constants.SessionDuration,
+    httpOnly: false,
+  }
 }));
 
 // app.use(express.static('./'))
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:8080",
+    "http://127.0.0.1"
+  ],
+  credentials: true,
+  exposedHeaders: ["Set-Cookie"]
+}));
 
 let port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Server listening on port '+port));
@@ -42,7 +52,6 @@ var ObjectID = require('mongodb').ObjectID;
 const { encrypt, compare, decrypt } = require('../crypt');
 
 let db;
-let Emails;
 let Users;
 let Creds;
 // connect to the database
@@ -50,7 +59,6 @@ MongoClient.connect(process.env.DB_URL+'/olive_pass', { useNewUrlParser: true, u
   if (err) return console.error(err)
   console.log('Connected to Database')
   db = client.db("olive_pass");
-  Emails = db.collection("emails");
   Users = db.collection("users");
   Creds = db.collection("creds");
 });
@@ -70,15 +78,17 @@ function validateRegistration(userData) {
 
 function encryptUserData(userData) {
   userData.password = encrypt(userData.password);
-  for (let rq of userData.questions) {
-    rq.answer = encrypt(rq.answer);
+  if (userData.questions) {
+    for (let rq of userData.questions) {
+      rq.answer = encrypt(rq.answer);
+    }
   }
   return userData;
 }
 
 function packageUserDocument(document) {
-  let {_id,username,email} = document;
-  return {_id, username, email}
+  let {_id,email} = document;
+  return {_id, email}
 }
 
 function encryptCreds(creds) {
@@ -124,6 +134,10 @@ app.use("/api/", async (req, res, next)=>{
   next();
 });
 
+app.get("/api/", (req,res)=>{
+  res.sendStatus(200);
+})
+
 app.post("/api/register", async (req, res)=> {
   let validation = validateRegistration(req.body);
   if (!validation.ok) return res.status(400).send(validation.msg);
@@ -131,10 +145,10 @@ app.post("/api/register", async (req, res)=> {
   let userData = encryptUserData(req.body);
   console.log("Registering...",userData)
 
-  let emailExists = await Users.findOne({ "email": userData.email }).then(async (result)=>{
-    return result;
-  });
-  if (emailExists) return res.status(400).send("An account already exists for that email!")
+  // let emailExists = await Users.findOne({ "email": userData.email }).then(async (result)=>{
+  //   return result;
+  // });
+  // if (emailExists) return res.status(400).send("An account already exists for that email!")
 
   Users.insertOne(userData).then(result=>{
     // console.log(result.result)
@@ -147,17 +161,18 @@ app.post("/api/register", async (req, res)=> {
   .catch((err)=>{
     console.log(err.code, err.keyValue);
     if (err.code = 11000) {
-      return res.status(400).send("Username '"+err.keyValue.username+"' is not available!")
+      return res.status(400).send("An account already exists for "+err.keyValue.email+"!")
     }
     else next();
   });
 })
 
 app.post("/api/login", async (req, res)=> {
-  let userData = await Users.findOne({ "username": req.body.username }).then(async (result)=>{
+  console.log("Attempting login...")
+  let userData = await Users.findOne({ "email": req.body.email }).then(async (result)=>{
     return result;
   });
-  if (!userData) return res.status(404).send("Could not find username.")
+  if (!userData) return res.status(404).send("Could not find account for that email.")
   if (!compare(req.body.password, userData.password)) {
     return res.status(400).send("Invalid password!")
   }
@@ -166,6 +181,7 @@ app.post("/api/login", async (req, res)=> {
 })
 
 app.post("/api/logout", (req, res)=> {
+  res.setHeader("Set-Cookie", "token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT")
   res.send("Logged out!");
   req.session.destroy();
   req.session = null;

@@ -9,6 +9,7 @@
   "author": "amj311 <contact@arthurjudd.com> (arthurjudd.com)",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "connect-mongodb-session": "^2.4.1",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

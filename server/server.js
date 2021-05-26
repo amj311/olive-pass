@@ -97,7 +97,7 @@ function encryptCreds(creds) {
 }
 
 function packageCredsDocument(document) {
-  delete document.password;
+  document.password = "";
   delete document.userId;
   return {...document};
 }
@@ -205,7 +205,7 @@ app.get('/api/creds/all', async (req, res) => {
 
 // Decrypt cred password
 app.get('/api/creds/p/:id', async (req, res) => {
-  console.log("Decrypt cred "+req.user._id);
+  console.log("Decrypt cred "+req.params.id);
 
   Creds.findOne({"_id": new ObjectID(req.params.id)}).then(cred => {
     if (!cred) {

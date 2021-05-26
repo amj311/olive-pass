@@ -8,7 +8,7 @@
     <table cellpadding="10">
       <tbody>
         <tr>
-          <th>Website</th>
+          <!-- <th>Website</th> -->
           <th>Nickname</th>
           <th>Username</th>
           <th>Password</th>
@@ -16,10 +16,13 @@
         </tr>
   
         <tr v-for="cred in creds" :key="cred.nickname">
-          <td>{{cred.domain}}</td>
+          <!-- <td>{{cred.domain}}</td> -->
           <td><b>{{cred.nickname}}</b></td>
           <td>{{cred.accountIdentifier}}</td>
           <td>{{cred.password || "*****"}}</td>
+          <td><button @click="togglePassword(cred)">
+            {{cred.password===""?"Show":"Hide"}}
+          </button></td>
           
         </tr>
 
@@ -47,6 +50,22 @@ export default class UserApp extends Vue {
     .then(res=>{
       console.log(res.data)
       this.creds = res.data;
+    })
+    .catch(({response}) => {
+      console.log(response.data);
+    })
+  }
+
+  togglePassword(cred) {
+    if (cred.password !== "") {
+      cred.password = ""
+      return;
+    }
+    console.log(cred._id)
+    axios.get("http://localhost:3000/api/creds/p/"+cred._id, {withCredentials:true})
+    .then(res=>{
+      console.log(res.data)
+      cred.password = res.data;
     })
     .catch(({response}) => {
       console.log(response.data);

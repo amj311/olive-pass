@@ -38,7 +38,7 @@ app.use(session({
 app.use(cors({
   origin: [
     "http://localhost:8080",
-    "http://127.0.0.1"
+    "http://127.0.0.1",
   ],
   credentials: true,
   exposedHeaders: ["Set-Cookie"]
@@ -67,6 +67,12 @@ MongoClient.connect(process.env.DB_URL+'/olive_pass', { useNewUrlParser: true, u
 
 // Logic
 function validateRegistration(userData) {
+  if(!userData.firstname){
+    return {ok:false, msg:"No first name!"}
+  };
+  if(!userData.lastname){
+    return {ok:false, msg:"No last name!"}
+  };
   if(!Constants.PasswordRegex.test(userData.password)){
     return {ok:false, msg:"Invalid password!"}
   };
@@ -87,8 +93,8 @@ function encryptUserData(userData) {
 }
 
 function packageUserDocument(document) {
-  let {_id,email} = document;
-  return {_id, email}
+  let {_id,email,firstname,lastname} = document;
+  return {_id, email,firstname,lastname}
 }
 
 function encryptCreds(creds) {
@@ -131,6 +137,8 @@ app.use("/api/", async (req, res, next)=>{
   });
   if (!userData) return res.status(401).send("Could not find user for session!")
   req.user = userData;
+  req.session._garbage = Date();
+  req.session.touch();
   next();
 });
 
@@ -203,6 +211,19 @@ app.get('/api/creds/all', async (req, res) => {
 
 
 
+// Get creds for a domain
+app.get('/api/creds/d/:domain', async (req, res) => {
+  console.log("Get creds for  "+req.params.domain);
+
+  Creds.find({"userId": req.user._id, "url": {$regex : `.*${req.params.domain}.*`}}).toArray(function(err, list) {
+    if (!err) {
+      list = list.map(c => packageCredsDocument(c))
+      res.status(200).json(list);
+    }
+  });
+});
+
+
 // Decrypt cred password
 app.get('/api/creds/p/:id', async (req, res) => {
   console.log("Decrypt cred "+req.params.id);
@@ -238,7 +259,7 @@ app.post('/api/creds/create', async(req, res) => {
       let keys = err.keyValue;
       return res
         .status(400)
-        .send("Nickname '"+keys.nickname+"' already exists for "+keys.domain)
+        .send("Nickname '"+keys.nickname+"' already exists for "+keys.url)
     }
     else next();
   });

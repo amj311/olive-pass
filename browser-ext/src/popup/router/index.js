@@ -8,7 +8,7 @@ import axios from 'axios'
 
 Vue.use(VueRouter)
 
-const routes: Array<RouteConfig> = [
+const routes = [
   {
     path: '/',
     name: 'Home',
@@ -28,8 +28,8 @@ const routes: Array<RouteConfig> = [
           next();
         })
         .catch(err=>{
-          console.warn("You are not logged in - rerouting to login.")
-          next('/login');
+          console.warn("You are not logged in - rerouting to home.")
+          next('/');
         })
     },
     children: [

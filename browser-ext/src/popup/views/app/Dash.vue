@@ -1,7 +1,7 @@
 <template>
-  <div class="about">
+  <div>
 
-    <input type="text" id="filterField" v-model="filterQuery" placeholder="Filter" />
+    <input type="search" id="filterField" v-model="filterQuery" placeholder="Filter" />
 
     <p v-show="loadingCreds" style="text-align: center">
       <Spinner :size="'2em'" :color="'var(--primary)'" />
@@ -24,6 +24,12 @@
               
         </div>
       </details>
+    </div>
+
+    <div v-if="credsByDomain.length === 0 && !loadingCreds" style="text-align:center">
+      <p v-if="creds.length === 0">You haven't saved any credentials yet.</p>
+      <p v-else-if="filterQuery">No matches. <a href="#" @click="filterQuery = ''">Clear filter?</a></p>
+      <p v-else>Couldn't load credentials.</p>
     </div>
   </div>
 </template>
@@ -167,6 +173,13 @@ th {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+input#filterField {
+    font-size: 1.25em;
+    width: 100%;
+    padding: .25rem;
+    box-sizing: border-box;
 }
 
 .domainCredsList summary {

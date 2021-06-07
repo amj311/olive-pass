@@ -226,10 +226,11 @@ label#op_toggleShow {
   display: block;
 }
 .op-loading-spinner {
-  border: 3px solid white;
+  display: inline-block;
+  border: .2em solid;
   border-top-color: transparent;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1em;
+  height: 1em;
   border-radius: 50%;
   display: none;
   animation: spin 2s infinite linear;

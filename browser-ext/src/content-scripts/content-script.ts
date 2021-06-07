@@ -130,14 +130,16 @@ function onNewLoginFieldsDetected(newAcctField: Element, newPassField: Element) 
 }
 
 
-function sendRequest(req:Request, onResponse: (res:Response)=>any) {
-  chrome.runtime.sendMessage(req, function(res:Response) {
+async function sendRequest(req:Request, onResponse: (res:Response)=>any) {
+  ui.showLoading(true);
+  await chrome.runtime.sendMessage(req, async function(res:Response) {
+    console.log("Res:", res)
     if (res.result === Result.LOGGED_OUT) {
-      uiToPage("login");
       loggedIn = false;
       uiToPage("login");
     }
     else onResponse(res);
+    ui.showLoading(false);
   });
 }
 

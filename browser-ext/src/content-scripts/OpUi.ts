@@ -4,8 +4,10 @@ import Credentials from "../../../model/Credentials";
 export default class OpUi {
   doc:Document;
   isRendered = false;
+  isLoading = false;
   isShowing = true;
   page: string = "";
+  uiEl!: HTMLDivElement;
   bodyEl!: HTMLDivElement;
   showToggle!: HTMLInputElement;
   presenter: OpUiPresenter;
@@ -22,6 +24,7 @@ export default class OpUi {
   public render() {
     if (this.isRendered) return;
     this.doc.body.insertAdjacentHTML("afterend", baseHTML);
+    this.uiEl = <HTMLDivElement>this.doc.getElementById("op_UI");
     this.bodyEl = <HTMLDivElement>this.doc.getElementById("op_body");
     
     this.showToggle = <HTMLInputElement>this.doc.getElementById("op_showBody");
@@ -43,6 +46,11 @@ export default class OpUi {
     newCredUrl.value = this.doc.location.href;
     
     this.isRendered = true;
+  }
+
+  showLoading(val:boolean) {
+    this.isLoading = val;
+    this.uiEl.className = val ? "loading" : "";
   }
 
   show() {
@@ -127,7 +135,9 @@ export interface OpUiPresenter {
 const baseHTML = `
 <div id="op_UI">
   <label for="op_showBody" id="op_toggleShow">
-    <div id="op_topBar">OlivePass
+    <div id="op_topBar">
+      <span>OlivePass</span>
+      <div id="op_loader"><div class="op-loading-spinner"></div></div>
     </div>
   </label>
   <input type="checkbox" id="op_showBody" checked hidden />
@@ -207,6 +217,30 @@ label#op_toggleShow {
   font-weight: bold;
   font-size: 1.2em;
   padding: .7em 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#op_UI.loading .op-loading-spinner {
+  display: block;
+}
+.op-loading-spinner {
+  border: 3px solid white;
+  border-top-color: transparent;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: none;
+  animation: spin 2s infinite linear;
+}
+@keyframes spin {
+  from {
+      transform:rotate(0deg);
+  }
+  to {
+      transform:rotate(360deg);
+  }
 }
 
 #op_body {

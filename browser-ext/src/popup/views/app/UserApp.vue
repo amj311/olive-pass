@@ -37,6 +37,16 @@ data() { return {
 }},
 
 beforeMount() {
+  axios.get(this.$store.state.api_url, {withCredentials:true})
+    .then(res=>{
+    })
+    .catch(err=>{
+      if (err.response?.status === 401) {
+        console.warn("You are not logged in - rerouting to home.")
+        this.$router.push('/');
+      }
+      else console.log(err)
+    })
 },
 
 mounted() {
@@ -48,7 +58,7 @@ methods: {
   },
 
   logout() {
-    axios.post("http://localhost:3000/api/logout")
+    axios.post(this.$store.state.api_url+"logout")
       .then(res=>{
         this.$router.push("/");
       })

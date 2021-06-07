@@ -1,42 +1,56 @@
 <template>
-   <div id="homePage">
-    <div class="home">
+  <div id="homePage">
+    <div>
       <h1><i>OlivePass</i></h1>
       <p>Simply safe, by SimplyOlive Apps.</p>
     </div>
 
-    <div v-if="mode === 'login'">
-      <Login />
-      <p><a href="#" @click="setMode('register')">Create an account →</a></p>
+    <div v-if="!loading">
+      <div v-if="mode === 'login'">
+        <Login />
+        <p><a href="#" @click="setMode('register')">Create an account →</a></p>
+      </div>
+      <div v-if="mode === 'register'">
+        <Register />
+        <p><a href="#" @click="setMode('login')">Log in to your account →</a></p>
+      </div>
     </div>
-    <div v-if="mode === 'register'">
-      <Register />
-      <p><a href="#" @click="setMode('login')">Log in to your account →</a></p>
+
+    <div v-else>
+      <p></p>
+      <Spinner :size="'2em'" />
+      <p>Loading...</p>
     </div>
-   </div>
+
+  </div>
 </template>
 
 <script>
 import axios from 'axios';
 import Login from './Login';
 import Register from './Register';
+import Spinner from '../../components/Spinner.vue';
 
 export default {
   name: 'Home',
   components: {
     Login,
-    Register
+    Register,
+    Spinner
   },
   data() { return {
-    mode: "login"
+    mode: "login",
+    loading: true,
   }},
 
   beforeMount() {
-    axios.get("http://localhost:3000/api/", {withCredentials:true})
+    console.log(this.$store.state.api_url)
+    axios.get(this.$store.state.api_url, {withCredentials:true})
       .then(res=>{
         this.$router.push("app");
       })
       .catch(err=>{
+        console.log(err)
       })
   },
   methods: {

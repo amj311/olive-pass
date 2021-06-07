@@ -22,16 +22,6 @@ const routes = [
   {
     path: '/app',
     component: UserApp,
-    beforeEnter: async (to,from,next) => {
-      axios.get("http://localhost:3000/api/", {withCredentials:true})
-        .then(res=>{
-          next();
-        })
-        .catch(err=>{
-          console.warn("You are not logged in - rerouting to home.")
-          next('/');
-        })
-    },
     children: [
       {
         path: '/',

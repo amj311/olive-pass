@@ -18,7 +18,7 @@ export default {
   }},
   methods: {
     login() {
-      axios.post("http://localhost:3000/api/login", {
+      axios.post(this.$store.state.api_url+"login", {
         email: this.email,
         password: this.password
       }, {withCredentials:true})

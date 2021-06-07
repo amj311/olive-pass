@@ -23,7 +23,7 @@ const routes: Array<RouteConfig> = [
     path: '/app',
     component: UserApp,
     beforeEnter: async (to,from,next) => {
-      axios.get("http://localhost:3000/api/", {withCredentials:true})
+      axios.get(this.$store.state.api_url+"", {withCredentials:true})
         .then(res=>{
           next();
         })

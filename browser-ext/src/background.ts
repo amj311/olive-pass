@@ -5,44 +5,57 @@ import { getHostName } from './content-scripts/Utils';
 import { Action, Request, Response, Result } from './lib/Messages';
 
 
-chrome.runtime.onMessage.addListener( async function(request:any, sender:chrome.runtime.MessageSender, sendResponse: (res:Response)=>any) {
+chrome.runtime.onMessage.addListener( function(request:any, sender:chrome.runtime.MessageSender, sendResponse: (res:Response)=>any) {
   if (request.type === "SIGN_CONNECT") {
     return console.log("Connected to sender:", sender.url);
   }
-  
+
   let msgId = Date.now();
   console.log("MESSAGE "+msgId, {sender}, {request});
   
-  let res: Response = new Response(Result.ERROR, "Invalid action.");
+  let handler;
   switch (request.action) {
     case Action.GET_DOMAIN_CREDS:
-      res = await getDomainCreds(request, sender);
+      handler = getDomainCreds;
       break;
   
     case Action.CRED_PASS:
-      res = await getCredPass(request, sender);
+      handler = getCredPass;
       break;
 
     case Action.LOGIN:
-      res = await attemptLogin(request, sender);
+      handler = attemptLogin;
       break;
     
     case Action.NEW_CRED:
-      res = await createCreds(request, sender);
+      handler = createCreds;
       break;
     
     default:
+      handler = async function() {
+        return new Response(Result.ERROR, "Invalid action.");
+      };
       break;
   }
   
-  console.log("RESPONSE "+msgId, res);
-  sendResponse(res);
+  handler(request, sender)
+    .then(res=>{
+      console.log("RESPONSE "+msgId, res);
+      sendResponse(res);
+    })
+    .catch(err=>{
+      console.log("RESPONSE "+msgId, err);
+      sendResponse(new Response(Result.ERROR, err));
+    });
+
+  return true; // Inform Chrome that we will make a delayed sendResponse
 });
 
 
 async function api(method:"get"|"post"|"put"|"delete", path:string, body?:any): Promise<Response> {
   let config = {withCredentials:true};
-  let apiRoot = "http://localhost:3000/api/";
+  let apiRoot = "https://olive-pass.herokuapp.com/api/";
+
   let url= apiRoot+path;
   let handler: any;
   let args: any[];
@@ -68,30 +81,31 @@ async function api(method:"get"|"post"|"put"|"delete", path:string, body?:any): 
       break;
   }
 
-  return new Promise<Response>( (resolve, reject)=>{
-    handler(...args)
-      .then((res:AxiosResponse<any>)=>{
-        resolve( new Response(Result.SUCCESS, res));
-      })
-      .catch((err:AxiosError)=>{
-        let body:any = err;
-        let result = Result.ERROR;
-        if (err.response) {
-          if (err.response.status === 401)  result = Result.LOGGED_OUT;
-          body = err.response;
-        }
-        resolve(new Response(result,body));
-      })
-  });
+  let res = await handler(...args)
+    .then((res:AxiosResponse<any>)=>{
+      console.log("Res:", res);
+      return new Response(Result.SUCCESS, res);
+    })
+    .catch((err:AxiosError)=>{
+      console.log("Err:", err);
+      let body:any = err;
+      let result = Result.ERROR;
+      if (err.response) {
+        if (err.response.status === 401)  result = Result.LOGGED_OUT;
+        body = err.response;
+      }
+      return new Response(result,body);
+    });
+  return res;
 }
 
 async function getDomainCreds(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
   let host = getHostName(<string>sender?.url);
-  console.log(host);
   let res:Response = await api("get","creds/d/"+host);
   if (res.result===Result.SUCCESS) {
     res.body = res.body.data;
   }
+  console.log(res);
   return res;
 }
 

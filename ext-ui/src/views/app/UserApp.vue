@@ -43,7 +43,7 @@ mounted() {
 methods: {
   
   getCreds() {
-    axios.get("http://localhost:3000/api/creds/all", {withCredentials:true})
+    axios.get(this.$store.state.api_url+"creds/all", {withCredentials:true})
     .then(res=>{
       console.log(res.data)
       this.creds = res.data;
@@ -59,7 +59,7 @@ methods: {
       return;
     }
     console.log(cred._id)
-    axios.get("http://localhost:3000/api/creds/p/"+cred._id, {withCredentials:true})
+    axios.get(this.$store.state.api_url+"creds/p/"+cred._id, {withCredentials:true})
     .then(res=>{
       console.log(res.data)
       cred.password = res.data;

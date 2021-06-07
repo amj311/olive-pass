@@ -40,16 +40,18 @@ export default {
   },
   data() { return {
     mode: "login",
-    loading: true,
+    loading: false,
   }},
 
   beforeMount() {
-    console.log(this.$store.state.api_url)
+    this.loading = true;
     axios.get(this.$store.state.api_url, {withCredentials:true})
       .then(res=>{
         this.$router.push("app");
+        this.loading = false;
       })
       .catch(err=>{
+        this.loading = false;
         console.log(err)
       })
   },
@@ -63,6 +65,13 @@ export default {
 
 <style scoped>
 #homePage {
+  display: flex;
+  width:100%;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+  place-content: center;
+  flex-direction: column;
   background-color: var(--primary);
   background-image: radial-gradient(transparent, 70%, #fff7);
   color: #fff;

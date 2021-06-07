@@ -20,7 +20,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   width: 300px;
-  max-height: 400px;
+  height: 400px;
   overflow: auto;
 }
 

@@ -61,7 +61,6 @@ methods: {
     this.loadingCreds = true;
     axios.get(this.$store.state.api_url+"creds/all", {withCredentials:true})
     .then(res=>{
-      console.log(res.data)
       this.creds = res.data;
     })
     .catch(({response}) => {
@@ -77,10 +76,8 @@ methods: {
       cred.password = ""
       return;
     }
-    console.log(cred._id)
     axios.get(this.$store.state.api_url+"creds/p/"+cred._id, {withCredentials:true})
     .then(res=>{
-      console.log(res.data)
       cred.password = res.data;
     })
     .catch(({response}) => {
@@ -97,7 +94,6 @@ methods: {
 
     axios.delete(this.$store.state.api_url+"creds/"+cred._id, {withCredentials:true})
       .then(res=>{
-        console.log(res.data)
         this.creds = this.creds.filter(c => c._id != cred._id);
       })
       .catch(({response}) => {
@@ -142,15 +138,12 @@ methods: {
           hasQuery(c.url) ||
           hasQuery(c.nickname);
       });
-      console.log({filter})
       return filter;
     },
 
     credsByDomain() {
       let domains = new Map(); //<domain, creds[]>
       this.filteredCreds.forEach(c => {
-                console.log(c)
-
         let domain = this.truncateUrl(c.url);
         if (domains.has(domain)) {
           domains.get(domain).push(c);
@@ -158,8 +151,8 @@ methods: {
         else domains.set(domain,[c]);
       });
       return Array.from(domains.keys())
-        .map(d => {return {host:d,creds:domains.get(d)}})
-        .sort((d1,d2) => d1.host > d2.host);
+        .sort()
+        .map(d => {return {host:d,creds:domains.get(d)}});;
     }
   }
 }

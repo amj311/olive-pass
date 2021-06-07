@@ -3,6 +3,9 @@
 
     <input type="text" id="filterField" v-model="filterQuery" placeholder="Filter" />
 
+    <p v-show="loadingCreds" style="text-align: center">
+      <Spinner :size="'2em'" :color="'var(--primary)'" />
+    </p>
     <div v-for="domain in credsByDomain" :key="domain.host">
       <details class="domainCredsList" open>
         <summary>{{domain.host}}</summary>
@@ -28,10 +31,13 @@
 
 <script>
 import axios from 'axios'
+import Spinner from '../../../components/Spinner.vue';
 
 export default {
+components: { Spinner },
 name: "Dashboard",
 data() { return {
+  loadingCreds: false,
   creds: [],
   filterQuery: "",
 }},
@@ -46,6 +52,7 @@ mounted() {
 methods: {
   
   getCreds() {
+    this.loadingCreds = true;
     axios.get(this.$store.state.api_url+"creds/all", {withCredentials:true})
     .then(res=>{
       console.log(res.data)
@@ -53,6 +60,9 @@ methods: {
     })
     .catch(({response}) => {
       console.log(response.data);
+    })
+    .finally(()=>{
+      this.loadingCreds = false;
     })
   },
 

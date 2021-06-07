@@ -11,18 +11,7 @@
         <summary>{{domain.host}}</summary>
 
           <!-- eslint-disable-next-line -->
-          <div v-for="cred in domain.creds" :key="cred._id" class="credRow">
-            <div class="cred-cell nickname" ><b>{{cred.nickname}}</b></div>
-            <div class="cred-cell account" >{{cred.accountIdentifier}}</div>
-            <div class="cred-cell password" >{{cred.password || "••••••"}}</div>
-            <div class="cred-cell toggle" @click="togglePassword(cred)">
-              <i :class="`fa fa-eye${cred.password===''?'':'-slash'}`"></i>
-            </div>
-            <div class="cred-cell toggle" @click="deleteCred(cred)">
-              <i class="fa fa-trash"></i>
-            </div>
-              
-        </div>
+          <CredRow v-for="cred in domain.creds" :key="cred._id" :cred="cred" @delete="deleteCred(cred)" />
       </details>
     </div>
 
@@ -38,9 +27,10 @@
 <script>
 import axios from 'axios'
 import Spinner from '../../../components/Spinner.vue';
+import CredRow from './CredRow.vue';
 
 export default {
-components: { Spinner },
+components: { Spinner, CredRow },
 name: "Dashboard",
 data() { return {
   loadingCreds: false,

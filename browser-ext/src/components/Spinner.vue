@@ -25,7 +25,11 @@ export default {
   border: .2em solid;
   border-top-color: transparent;
   width: 1em;
+  min-width: 1em;
+  max-width: 1em;
   height: 1em;
+  min-height: 1em;
+  max-height: 1em;
   border-radius: 50%;
   animation: spin 2s infinite linear;
 }

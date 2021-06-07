@@ -92,6 +92,7 @@ methods: {
 
 #topMenu i[class*="fa "] {
   margin-left: .5em;
+  cursor: pointer;
 } 
 
 #appBody {

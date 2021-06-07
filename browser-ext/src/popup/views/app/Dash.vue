@@ -157,7 +157,9 @@ methods: {
         }
         else domains.set(domain,[c]);
       });
-      return Array.from(domains.keys()).map(d => {return {host:d,creds:domains.get(d)}})
+      return Array.from(domains.keys())
+        .map(d => {return {host:d,creds:domains.get(d)}})
+        .sort((d1,d2) => d1.host > d2.host);
     }
   }
 }

@@ -42,10 +42,16 @@ export default class OpUi {
     let newCredCancel = <HTMLButtonElement>this.doc.getElementById("op_newCredCancel");
     newCredCancel.addEventListener("click",()=>this.setPage("list"))
     
-    let newCredUrl = <HTMLInputElement>this.doc.getElementById("op_Url");
+    let newCredUrl = <HTMLInputElement>this.doc.getElementById("op_f_url");
     newCredUrl.value = this.doc.location.href;
     
     this.isRendered = true;
+  }
+
+  public remove() {
+    if (!this.isRendered) return;
+    this.uiEl.remove();
+    this.isRendered = false;
   }
 
   showLoading(val:boolean) {
@@ -63,8 +69,8 @@ export default class OpUi {
   }
 
   doLogin(): any {
-    let acctVal = (<HTMLInputElement>this.doc.getElementById("op_loginAcct")).value;
-    let passVal = (<HTMLInputElement>this.doc.getElementById("op_loginPass")).value;
+    let acctVal = (<HTMLInputElement>this.doc.getElementById("op_l_acct")).value;
+    let passVal = (<HTMLInputElement>this.doc.getElementById("op_l_pw")).value;
     let req = new Request(Action.LOGIN, {
       email: acctVal, password: passVal
     });
@@ -72,10 +78,10 @@ export default class OpUi {
   }
 
   saveNew(): any {
-    let nameVal = (<HTMLInputElement>this.doc.getElementById("op_Nickname")).value;
-    let urlVal = (<HTMLInputElement>this.doc.getElementById("op_Url")).value;
-    let acctVal = (<HTMLInputElement>this.doc.getElementById("op_Acct")).value;
-    let passVal = (<HTMLInputElement>this.doc.getElementById("op_Pass")).value;
+    let nameVal = (<HTMLInputElement>this.doc.getElementById("op_f_nn")).value;
+    let urlVal = (<HTMLInputElement>this.doc.getElementById("op_f_url")).value;
+    let acctVal = (<HTMLInputElement>this.doc.getElementById("op_f_acct")).value;
+    let passVal = (<HTMLInputElement>this.doc.getElementById("op_f_pw")).value;
     let req = new Request(Action.NEW_CRED, {
       nickname: nameVal,
       url: urlVal,
@@ -87,8 +93,9 @@ export default class OpUi {
 
 
   suggestNewCreds(passVal: string, acctVal: string) {
-    (<HTMLInputElement>this.doc.getElementById("op_Acct")).value = acctVal;
-    (<HTMLInputElement>this.doc.getElementById("op_Pass")).value = passVal;
+    if (!this.isRendered) return;
+    (<HTMLInputElement>this.doc.getElementById("op_f_acct")).value = acctVal;
+    (<HTMLInputElement>this.doc.getElementById("op_f_pw")).value = passVal;
     this.setPage("new");
     this.show();
   }
@@ -102,7 +109,9 @@ export default class OpUi {
   }
 
   public loadCreds(creds: Credentials[]) {
+    if (!this.isRendered) return;
     let credListEl = <HTMLDivElement>document.getElementById("op_credsList");
+    if (!credListEl) return;
     credListEl.innerHTML = ""
     creds.forEach(c => credListEl.appendChild(this.createCredRow(c)));
   }
@@ -145,8 +154,8 @@ const baseHTML = `
     <div id="op_login" class="op-page">
       <div class="op-h1">Log In</div>
       <p>
-        <input type="email" id="op_loginAcct" placeholder="Account" />
-        <input type="password" id="op_loginPass" placeholder="Password" />
+        <input type="text" id="op_l_acct" placeholder="Account" />
+        <input type="text" id="op_l_pw" placeholder="Password" />
         <br>
         <button id="op_loginButton">Log In</button>
       </p>
@@ -168,131 +177,137 @@ const baseHTML = `
     <div id="op_new" class="op-page">
       <div class="op-h1">New credentials:</div>
       <p>
-        <input type="text" id="op_Nickname" placeholder="Nickname" />
-        <input type="text" id="op_Url" placeholder="Url" />
-        <input type="email" id="op_Acct" placeholder="Account" />
-        <input type="password" id="op_Pass" placeholder="Password" />
+        <input type="text" id="op_f_nn" placeholder="Nickname" />
+        <input type="text" id="op_f_url" placeholder="Url" />
+        <input type="text" id="op_f_acct" placeholder="Account" />
+        <input type="text" id="op_f_pw" placeholder="Password" />
         <br>
         <button id="op_newCredButton">Save</button>
         <button id="op_newCredCancel">Cancel</button>
     </div>
   </div>
+
+
+  <style>
+  :root {
+    --op-primary: rgb(100, 212, 28);
+  }
+  
+  #op_UI {
+    background: #fff;
+    font-family: sans-serif;
+    position: fixed;
+    bottom: 0;
+    right: 2em;
+    overflow: hidden;
+    width: 250px;
+    border-top-left-radius: .8em;
+    border-top-right-radius: .8em;
+    box-shadow: 0 0 .5em #0002;
+    z-index: 9999999999;
+    font-size: 14px;
+  }
+  
+  .op-h1 {
+    color: var(--op-primary);
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0 !important;
+  }
+  
+  label#op_toggleShow {
+    display: block;
+    cursor: pointer;
+  }
+  
+  #op_topBar {
+    background: var(--op-primary);
+    color: white;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: .7em 1em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  #op_UI.loading .op-loading-spinner {
+    display: block;
+  }
+  .op-loading-spinner {
+    display: inline-block;
+    border: .2em solid;
+    border-top-color: transparent;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    display: none;
+    animation: spin 2s infinite linear;
+  }
+  @keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+  }
+  
+  #op_body {
+    display: none;
+    padding: 1em;
+    max-height: 40vh;
+    min-height: 100px;
+    overflow-y: auto;
+  }
+  
+  #op_showBody:checked+#op_body {
+    display: block;
+  }
+  
+  #op_body>.op-page {
+    display: none;
+  }
+  
+  #op_body[page="login"]>#op_login {
+    display: block;
+  }
+  
+  #op_body[page="new"]>#op_new {
+    display: block;
+  }
+  
+  #op_body[page="list"]>#op_list {
+    display: block;
+  }
+  
+  .op-cred-row {
+    padding: .5em;
+    border-bottom: 1px solid #0001;
+    cursor: pointer;
+    user-select: none;
+  }
+  .op-cred-row:hover {
+    background: #00000007;
+  }
+  
+  
+  .op-cred-account {
+    color: #888;
+  }
+  
+  #op_newCredsLink {
+    color: var(--op-primary);
+    text-align: center;
+    padding: .5em;
+    line-height: 3em;
+    cursor: pointer;
+  }
+
+  #op_l_pw, #op_f_pw {
+    -webkit-text-security: disc;
+  }
+  </style>
+
 </div>
-
-<style>
-:root {
-  --op-primary: rgb(100, 212, 28);
-}
-
-#op_UI {
-  background: #fff;
-  font-family: sans-serif;
-  position: fixed;
-  bottom: 0;
-  right: 2em;
-  overflow: hidden;
-  width: 250px;
-  border-top-left-radius: .8em;
-  border-top-right-radius: .8em;
-  box-shadow: 0 0 .5em #0002;
-  z-index: 9999999999;
-  font-size: 14px;
-}
-
-.op-h1 {
-  color: var(--op-primary);
-  font-size: 1.2em;
-  font-weight: bold;
-  margin: 0 !important;
-}
-
-label#op_toggleShow {
-  display: block;
-  cursor: pointer;
-}
-
-#op_topBar {
-  background: var(--op-primary);
-  color: white;
-  font-weight: bold;
-  font-size: 1.2em;
-  padding: .7em 1em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-#op_UI.loading .op-loading-spinner {
-  display: block;
-}
-.op-loading-spinner {
-  display: inline-block;
-  border: .2em solid;
-  border-top-color: transparent;
-  width: 1em;
-  height: 1em;
-  border-radius: 50%;
-  display: none;
-  animation: spin 2s infinite linear;
-}
-@keyframes spin {
-  from {
-      transform:rotate(0deg);
-  }
-  to {
-      transform:rotate(360deg);
-  }
-}
-
-#op_body {
-  display: none;
-  padding: 1em;
-  max-height: 40vh;
-  min-height: 100px;
-  overflow-y: auto;
-}
-
-#op_showBody:checked+#op_body {
-  display: block;
-}
-
-#op_body>.op-page {
-  display: none;
-}
-
-#op_body[page="login"]>#op_login {
-  display: block;
-}
-
-#op_body[page="new"]>#op_new {
-  display: block;
-}
-
-#op_body[page="list"]>#op_list {
-  display: block;
-}
-
-.op-cred-row {
-  padding: .5em;
-  border-bottom: 1px solid #0001;
-  cursor: pointer;
-  user-select: none;
-}
-.op-cred-row:hover {
-  background: #00000007;
-}
-
-
-.op-cred-account {
-  color: #888;
-}
-
-#op_newCredsLink {
-  color: var(--op-primary);
-  text-align: center;
-  padding: .5em;
-  line-height: 3em;
-  cursor: pointer;
-}
-</style>
 `

@@ -37,18 +37,24 @@ function getPossibleAttrsWithVals(vals: string[]): string[] {
 
 let acctPossibleVals = [
   ...allCapVariants("phone"),
+  ...allCapVariants("login"),
   ...allCapVariants("email"),
   ...allCapVariants("user"),
 ]
 let acctAttrs = getPossibleAttrsWithVals(acctPossibleVals);
 let passAttrs = getPossibleAttrsWithVals(allCapVariants("password"));
 let newAttrs = getPossibleAttrsWithVals(allCapVariants("new"));
+let opNotAttrs = getPossibleAttrsWithVals([
+  ...allCapVariants("op_"),
+  ...allCapVariants("op-"),
+]);
 
 let acctNots = acctAttrs.map(a => `:not(${a})`).join("");
 let passNots = passAttrs.map(a => `:not(${a})`).join("");
 let newNots = newAttrs.map(a => `:not(${a})`).join("");
+let opNots = opNotAttrs.map(a => `:not(${a})`).join("");
 let typeNots = ['checkbox','submit','number','range',"hidden"].map(t=> `:not([type="${t}"])`).join("");
-let globalNots = [":not(#op_UI input)",...typeNots,...newNots].join("");
+let globalNots = [...opNots,...typeNots,...newNots].join("");
 
 let acctnameSelector = acctAttrs.map(a => `input${a}${globalNots}${passNots}`).join(", ");
 let passwordSelector = passAttrs.map(a => `input${a}${globalNots}`).join(", ");
@@ -91,7 +97,10 @@ ready(() => {
 function updateFieldsFilter(fields: { acct?:Element[], pass?:Element[]}) {
   let res = fieldsFilter.updateFilter(fields);
   if (res.success) onNewLoginFieldsDetected(res.acctFields[0],res.passFields[0]);
-  else console.log("Did not detect login fields.")
+  else {
+    console.log("Did not detect login fields.")
+    ui.remove();
+  }
 }
 
 function onNewLoginFieldsDetected(newAcctField: Element, newPassField: Element) {

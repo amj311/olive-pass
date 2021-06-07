@@ -126,7 +126,7 @@ export interface OpUiPresenter {
 
 const baseHTML = `
 <div id="op_UI">
-  <label for="op_showBody"id="op_toggleShow">
+  <label for="op_showBody" id="op_toggleShow">
     <div id="op_topBar">OlivePass
     </div>
   </label>
@@ -196,7 +196,8 @@ const baseHTML = `
   margin: 0 !important;
 }
 
-#op_toggleShow {
+label#op_toggleShow {
+  display: block;
   cursor: pointer;
 }
 

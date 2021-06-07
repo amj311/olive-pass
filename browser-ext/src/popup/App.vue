@@ -19,7 +19,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  width: 300px;
+  width: 350px;
   height: 400px;
   overflow: auto;
 }

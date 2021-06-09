@@ -103,6 +103,7 @@ export default class OpUi {
 
   public setPage(page: string): boolean {
     if (!this.isRendered) return false;
+    if (!this.presenter.isLoggedIn()) page = "login";
     this.page = page;
     this.bodyEl?.setAttribute("page", page);
     return true;
@@ -131,6 +132,7 @@ export default class OpUi {
 
 
 export interface OpUiPresenter {
+  isLoggedIn(): boolean;
   saveNew(req: Request): void;
   doLogin(req:Request): void;
   fetchCreds(): void;
@@ -281,6 +283,18 @@ const baseHTML = `
     display: block;
   }
   
+  #op_UI input:active {
+    border: 2px solid var(--op-primary);
+  }
+
+  #op_UI input {
+    width: 100%;
+    margin: .2em 0;
+    font-size: 1.1em;
+    padding: .2em;
+    box-sizing: border-box;
+  }
+
   .op-cred-row {
     padding: .5em;
     border-bottom: 1px solid #0001;

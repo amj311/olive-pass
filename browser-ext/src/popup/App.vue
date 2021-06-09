@@ -27,4 +27,17 @@ body {
 a {
   color: var(--primary);
 }
+
+
+input[type="text"], input[type="email"], input[type="password"], input[type="search"] {
+  width: 100%;
+  margin: .2em 0;
+  font-size: 1.1em;
+  padding: .2em;
+  box-sizing: border-box;
+  
+  :active {
+    border: 2px solid var(--primary);
+  }
+}
 </style>

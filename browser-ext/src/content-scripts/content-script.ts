@@ -3,21 +3,7 @@ import OpUi, { OpUiPresenter } from './OpUi'
 import { Action, Request, Response, Result } from '@/lib/Messages';
 import FieldsFilter from './FieldsFIlter';
 import Credentials from '../../../model/Credentials';
-
-class Presenter implements OpUiPresenter {
-  saveNew(req: Request): void {
-    saveCreds(req);
-  }
-  doLogin(req: Request): void {
-    doLogin(req);
-  }
-  fetchCreds(): void {
-    throw new Error('Method not implemented.');
-  }
-  onCredSelect(cred: Credentials) {
-    insertCred(cred);
-  }
-}
+import { Log } from './Utils';
 
 function allCapVariants(string: string): string[] {
   let lower = string.toLowerCase();
@@ -59,6 +45,24 @@ let globalNots = [...opNots,...typeNots,...newNots].join("");
 let acctnameSelector = acctAttrs.map(a => `input${a}${globalNots}${passNots}`).join(", ");
 let passwordSelector = passAttrs.map(a => `input${a}${globalNots}`).join(", ");
 
+let loggedIn = true;
+class Presenter implements OpUiPresenter {
+  isLoggedIn(): boolean {
+    return loggedIn;
+  }
+  saveNew(req: Request): void {
+    saveCreds(req);
+  }
+  doLogin(req: Request): void {
+    doLogin(req);
+  }
+  fetchCreds(): void {
+    throw new Error('Method not implemented.');
+  }
+  onCredSelect(cred: Credentials) {
+    insertCred(cred);
+  }
+}
 
 const fieldsFilter = new FieldsFilter();
 const passFieldWatcher = new QueryWatcher('input[type="password"]');
@@ -66,16 +70,15 @@ const acctFieldWatcher = new QueryWatcher(acctnameSelector);
 let acctField: HTMLInputElement;
 let passField: HTMLInputElement;
 let creds: Credentials[] = [];
-let loggedIn = true;
 let ui: OpUi = new OpUi(document, new Presenter());
 
 
 passFieldWatcher.matches.subscribe((els)=>{
-  console.log("Latest Pass Fields: ",els);
+  Log.info("Latest Pass Fields: ",els);
   updateFieldsFilter({pass:els})
 })
 acctFieldWatcher.matches.subscribe((els: Element[])=>{
-  console.log("Latest Acct Fields: ",els)
+  Log.info("Latest Acct Fields: ",els)
   updateFieldsFilter({acct:els})
 })
 
@@ -98,7 +101,7 @@ function updateFieldsFilter(fields: { acct?:Element[], pass?:Element[]}) {
   let res = fieldsFilter.updateFilter(fields);
   if (res.success) onNewLoginFieldsDetected(res.acctFields[0],res.passFields[0]);
   else {
-    console.log("Did not detect login fields.")
+    Log.info("Did not detect login fields.")
     ui.remove();
   }
 }
@@ -107,13 +110,12 @@ function onNewLoginFieldsDetected(newAcctField: Element, newPassField: Element) 
   if (!(newAcctField instanceof HTMLInputElement)) throw new Error("Account field is not an input!");
   if (!(newPassField instanceof HTMLInputElement)) throw new Error("Password field is not an input!");
 
-  console.log("Login detected!");
+  Log.info("Login detected!");
 
   if (acctField != newAcctField) {
     acctField = newAcctField;
-    setUpInputValueListener(acctField, (val:string)=>{
-      console.log("Account:",val);
-    });
+    // setUpInputValueListener(acctField, (val:string)=>{
+    // });
     acctField.addEventListener("focus", ()=>{
       showCreds();
     })
@@ -123,9 +125,8 @@ function onNewLoginFieldsDetected(newAcctField: Element, newPassField: Element) 
   }
   if (passField != newPassField) {
     passField = newPassField;
-    setUpInputValueListener(passField, (val:string)=>{
-      console.log("Password:",val)
-    });
+    // setUpInputValueListener(passField, (val:string)=>{
+    // });
     passField.addEventListener("focus", ()=>{
       showCreds();
     })
@@ -142,7 +143,6 @@ function onNewLoginFieldsDetected(newAcctField: Element, newPassField: Element) 
 async function sendRequest(req:Request, onResponse: (res:Response)=>any) {
   ui.showLoading(true);
   await chrome.runtime.sendMessage(req, async function(res:Response) {
-    console.log("Res:", res)
     if (res.result === Result.LOGGED_OUT) {
       loggedIn = false;
       uiToPage("login");

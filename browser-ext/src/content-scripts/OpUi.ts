@@ -42,9 +42,6 @@ export default class OpUi {
     let newCredCancel = <HTMLButtonElement>this.doc.getElementById("op_newCredCancel");
     newCredCancel.addEventListener("click",()=>this.setPage("list"))
     
-    let newCredUrl = <HTMLInputElement>this.doc.getElementById("op_f_url");
-    newCredUrl.value = this.doc.location.href;
-    
     this.isRendered = true;
   }
 
@@ -69,17 +66,12 @@ export default class OpUi {
   }
 
   doLogin(): any {
-    let acctVal = (<HTMLInputElement>this.doc.getElementById("op_l_acct")).value;
-    let passVal = (<HTMLInputElement>this.doc.getElementById("op_l_pw")).value;
-    let req = new Request(Action.LOGIN, {
-      email: acctVal, password: passVal
-    });
-    this.presenter.doLogin(req);
+    this.presenter.openLogin();
   }
 
   saveNew(): any {
     let nameVal = (<HTMLInputElement>this.doc.getElementById("op_f_nn")).value;
-    let urlVal = (<HTMLInputElement>this.doc.getElementById("op_f_url")).value;
+    let urlVal = this.doc.location.href;
     let acctVal = (<HTMLInputElement>this.doc.getElementById("op_f_acct")).value;
     let passVal = (<HTMLInputElement>this.doc.getElementById("op_f_pw")).value;
     let req = new Request(Action.NEW_CRED, {
@@ -134,7 +126,7 @@ export default class OpUi {
 export interface OpUiPresenter {
   isLoggedIn(): boolean;
   saveNew(req: Request): void;
-  doLogin(req:Request): void;
+  openLogin(): void;
   fetchCreds(): void;
   onCredSelect(cred:Credentials): void;
 }
@@ -153,12 +145,10 @@ const baseHTML = `
   </label>
   <input type="checkbox" id="op_showBody" checked hidden />
   <div id="op_body" page>
-    <div id="op_login" class="op-page">
-      <div class="op-h1">Log In</div>
+    <div id="op_login" class="op-page" style="text-align: center">
+      <div class="op-h1">You are logged out of OlivePass</div>
+      <br>
       <p>
-        <input type="text" id="op_l_acct" placeholder="Account" />
-        <input type="text" id="op_l_pw" placeholder="Password" />
-        <br>
         <button id="op_loginButton">Log In</button>
       </p>
     </div>
@@ -179,10 +169,15 @@ const baseHTML = `
     <div id="op_new" class="op-page">
       <div class="op-h1">New credentials:</div>
       <p>
-        <input type="text" id="op_f_nn" placeholder="Nickname" />
-        <input type="text" id="op_f_url" placeholder="Url" />
+        <input type="text" id="op_f_nn" placeholder="Nickname (Optional)" />
         <input type="text" id="op_f_acct" placeholder="Account" />
-        <input type="text" id="op_f_pw" placeholder="Password" />
+        <div class="op-input-group">
+          <input type="checkbox" id="op_showPass" hidden>
+          <input type="text" id="op_f_pw" placeholder="Password">
+          <label for="op_showPass" class="op-pw-lbl">
+            <div class="op-checkbox"></div> Show
+          </label>
+        </div>
         <br>
         <button id="op_newCredButton">Save</button>
         <button id="op_newCredCancel">Cancel</button>
@@ -318,8 +313,44 @@ const baseHTML = `
     cursor: pointer;
   }
 
-  #op_l_pw, #op_f_pw {
+  .op-input-group {
+    display: flex;
+    align-items: center;
+  }
+
+  
+  #op_f_pw {
     -webkit-text-security: disc;
+  }
+  #op_showPass:checked + #op_f_pw {
+    -webkit-text-security: revert;
+  }
+ 
+  .op-pw-lbl {
+    display: flex;
+    cursor: pointer;
+  }
+
+  .op-checkbox {
+    display: inline-block;
+    border: 1px solid;
+    width: 1em;
+    max-width: 1em;
+    height: 1em;
+    max-height: 1em;
+    overflow: visible;
+    margin: 0 .25em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #op_showPass:checked + #op_f_pw + .op-pw-lbl > .op-checkbox::before {
+    content: '✔';
+    color: var(--op-primary);
+    font-size: 1.7em;
+    font-weight: bold;
+    transform: translateY(-.1em);
   }
   </style>
 

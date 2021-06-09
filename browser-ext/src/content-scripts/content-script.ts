@@ -53,8 +53,8 @@ class Presenter implements OpUiPresenter {
   saveNew(req: Request): void {
     saveCreds(req);
   }
-  doLogin(req: Request): void {
-    doLogin(req);
+  openLogin(): void {
+    openLogin();
   }
   fetchCreds(): void {
     throw new Error('Method not implemented.');
@@ -156,8 +156,8 @@ function setUpInputValueListener(f: HTMLInputElement, onUpdate:(val:string)=>any
 }
 
 
-function doLogin(req:Request) {
-  sendRequest(req, function(response:Response) {
+function openLogin() {
+  sendRequest(new Request(Action.LOGIN), function(response:Response) {
     if (response.result === Result.SUCCESS) {
       loggedIn = true;
       getAndShowCreds();

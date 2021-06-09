@@ -5,7 +5,9 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    api_url: "https://olive-pass.herokuapp.com/api/",
+    api_url: process.env.NODE_ENV === "development" ?
+    `http://localhost:${process.env.PORT || 3000}/api/` :
+    "https://olive-pass.herokuapp.com/api/",
   },
   mutations: {
   },

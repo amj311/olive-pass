@@ -3,7 +3,7 @@ import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import UserApp from '../views/app/UserApp.vue'
-import Dash from '../views/app/Dash.vue'
+import Creds from '../views/app/Creds.vue'
 import axios from 'axios'
 
 Vue.use(VueRouter)
@@ -25,8 +25,8 @@ const routes = [
     children: [
       {
         path: '/',
-        name: 'Dashboard',
-        component: Dash,
+        name: 'Creds',
+        component: Creds,
       },
     ]
   }

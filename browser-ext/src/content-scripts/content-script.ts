@@ -95,8 +95,6 @@ ready(() => {
 
 
 
-
-
 function updateFieldsFilter(fields: { acct?:Element[], pass?:Element[]}) {
   let res = fieldsFilter.updateFilter(fields);
   if (res.success) onNewLoginFieldsDetected(res.acctFields[0],res.passFields[0]);

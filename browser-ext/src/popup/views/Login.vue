@@ -24,7 +24,7 @@ export default {
       }, {withCredentials:true})
       .then(res=>{
         console.log(res.data)
-        this.$router.push({name: "Dashboard"})
+        this.$router.push({name: "Creds"})
       })
       .catch(({response}) => {
         console.log(response.data);

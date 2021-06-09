@@ -1,14 +1,14 @@
 export enum Action {
-  GET_DOMAIN_CREDS,
-  CRED_PASS,
-  NEW_CRED,
-  LOGIN
+  GET_DOMAIN_CREDS = "GET_DOMAIN_CREDS",
+  CRED_PASS = "CRED_PASS",
+  NEW_CRED = "NEW_CRED",
+  LOGIN = "LOGIN"
 }
 
 export enum Result {
-  LOGGED_OUT,
-  SUCCESS,
-  ERROR,
+  LOGGED_OUT = "LOGGED_OUT",
+  SUCCESS = "SUCCESS",
+  ERROR = "ERROR",
 }
 
 export class Request {

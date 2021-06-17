@@ -47,7 +47,7 @@ export default {
 
   beforeMount() {
     this.loading = true;
-    axios.get(this.$store.state.api_url, {withCredentials:true})
+    axios.get(this.$store.state.api_url+"check-auth", {withCredentials:true})
       .then(res=>{
         this.$router.push("app");
         this.loading = false;

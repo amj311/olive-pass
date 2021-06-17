@@ -23,11 +23,11 @@ export default {
   methods: {
     register() {
       let {email, password, firstname, lastname} = this;
-      axios.post(this.$store.state.api_url+"register", {
+      axios.post(this.$store.state.api_url+"auth/register", {
         email, password, firstname, lastname
       }, {withCredentials:true})
       .then(res=>{
-        axios.post(this.$store.state.api_url+"login", {
+        axios.post(this.$store.state.api_url+"auth/login", {
         email, password,
       }, {withCredentials:true})
         .then(res=>{

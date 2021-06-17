@@ -38,7 +38,7 @@ data() { return {
 }},
 
 beforeMount() {
-  axios.get(this.$store.state.api_url, {withCredentials:true})
+  axios.get(this.$store.state.api_url+"check-auth", {withCredentials:true})
     .then(res=>{
     })
     .catch(err=>{
@@ -60,7 +60,7 @@ methods: {
 
   logout() {
     if (!confirm("Are your sure you want to log out of OlivePass?")) return;
-    axios.post(this.$store.state.api_url+"logout")
+    axios.post(this.$store.state.api_url+"auth/logout")
       .then(res=>{
         chrome.cookies.remove({url:this.$store.state.api_url,name:"op-session"});
         this.$router.push("/");

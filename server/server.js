@@ -55,17 +55,12 @@ const Mailer = require('./Mailer');
 
 let db;
 let Users;
-let Creds;
-let EmailConfirms;
 // connect to the database
 MongoClient.connect(process.env.DB_URL+'/olive_pass', { useNewUrlParser: true, useUnifiedTopology: true }, (err,client)=>{
   if (err) return console.error(err)
   console.log('Connected to Database')
   db = client.db("olive_pass");
   Users = db.collection("users");
-  Creds = db.collection("creds");
-  EmailConfirms = db.collection("email_confirms");
-
   setupRoutes(app);
 });
 
@@ -76,44 +71,8 @@ MongoClient.connect(process.env.DB_URL+'/olive_pass', { useNewUrlParser: true, u
 const mailer = new Mailer({
   domain: process.env.MAIL_DOMAIN,
   apiKey: process.env.MAIL_API_KEY,
-  sender: "OlivePass Support <no-reply@olivepass.com>"
+  sender: process.env.MAIL_DEFAULT_SENDER,
 })
-
-
-
-
-// Logic
-function validateRegistration(userData) {
-  if(!userData.firstname){
-    return {ok:false, msg:"No first name!"}
-  };
-  if(!userData.lastname){
-    return {ok:false, msg:"No last name!"}
-  };
-  if(!Constants.PasswordRegex.test(userData.password)){
-    return {ok:false, msg:"Invalid password!"}
-  };
-  if(!Constants.EmailRegex.test(userData.email)){
-    return {ok:false, msg:"Invalid email!"}
-  };
-  return {ok:true};
-}
-
-function encryptUserData(userData) {
-  userData.password = encrypt(userData.password);
-  if (userData.questions) {
-    for (let rq of userData.questions) {
-      rq.answer = encrypt(rq.answer);
-    }
-  }
-  return userData;
-}
-
-function packageUserDocument(document) {
-  let {_id,email,firstname,lastname} = document;
-  return {_id, email,firstname,lastname}
-}
-
 
 
 
@@ -147,84 +106,19 @@ async function authGaurd(req, res, next) {
 // Routes
 function setupRoutes(app) {
   app.use("/api/", checkDbConnection);
-  app.use("/api/", async (req, res, next)=>{
-    if (["/register","/login"].includes(req.path)) return next();
-    else authGaurd(req,res,next);
-  });
   
-  app.get("/api/", (req,res)=>{
+  app.use('/api/check-auth', authGaurd);
+  app.get("/api/check-auth", (req,res)=>{
     res.sendStatus(200);
   })
   
-  app.post("/api/register", async (req, res)=> {
-    let validation = validateRegistration(req.body);
-    if (!validation.ok) return res.status(400).send(validation.msg);
-    
-    let userData = encryptUserData(req.body);
-    console.log("Registering...",userData)
-  
-    Users.insertOne(userData).then(result=>{
-      // console.log(result.result)
-      let success = result.insertedCount >= 1;
-      if (success) {
-        console.log("Saved!")
-        res.status(200).json(packageUserDocument(result.ops[0]));
-      }
-    })
-    .catch((err)=>{
-      console.log(err.code, err.keyValue);
-      if (err.code = 11000) {
-        return res.status(400).send("An account already exists for "+err.keyValue.email+"!")
-      }
-      else next();
-    });
-  })
-  
-  app.post("/api/login", async (req, res)=> {
-    console.log("Attempting login...")
-    let userData = await Users.findOne({ "email": req.body.email }).then(async (result)=>{
-      return result;
-    });
-    if (!userData) return res.status(404).send("Could not find account for that email.")
-    if (!compare(req.body.password, userData.password)) {
-      return res.status(400).send("Invalid password!")
-    }
-    req.session.userId = userData._id;
-    res.json(packageUserDocument(userData));
-  })
-  
-  app.post("/api/logout", (req, res)=> {
-    res.setHeader("Set-Cookie", "token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT")
-    res.send("Logged out!");
-    req.session.destroy();
-    req.session = null;
-  })
+  const auth = require('./routes/auth');
+  app.use('/api/auth', auth(db, mailer));
   
   
   const creds = require('./routes/creds');
   app.use('/api/creds', authGaurd);
   app.use('/api/creds', creds(db));
-  
-  
-  app.post('/auth/sendEmail', async(req, res) => {
-    let msg = {
-      to: "amjudd315@gmail.com",
-      subject: "Message From OlivePass",
-      html: `
-        <h1>Message from OlivePass</h1>
-        <br>
-        <p>Welcome aboard!</p>
-      `
-    }
-    mailer.send(msg, (error, body)=>{
-      if (error) {
-        console.log(error);
-        return res.status(500).send("Server Error");
-      }
-      res.json(body);
-    })
-  })
-  
   
   
   

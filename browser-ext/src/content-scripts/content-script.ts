@@ -65,7 +65,7 @@ class Presenter implements OpUiPresenter {
 }
 
 const fieldsFilter = new FieldsFilter();
-const passFieldWatcher = new QueryWatcher('input[type="password"]');
+const passFieldWatcher = new QueryWatcher(passwordSelector);
 const acctFieldWatcher = new QueryWatcher(acctnameSelector);
 let acctField: HTMLInputElement;
 let passField: HTMLInputElement;
@@ -184,8 +184,9 @@ function insertCred(cred: Credentials) {
   sendRequest(new Request(Action.CRED_PASS, cred._id), (res)=>{
     if (res.result === Result.SUCCESS) {
       acctField.value = cred.accountIdentifier;
-      passField.value = res.body;  
-      ui.hide();  
+      passField.value = res.body;
+      passField.focus();
+      ui.hide();
     }
   })
 }

@@ -204,20 +204,25 @@ const baseHTML = `
     z-index: 9999999999;
     font-size: 14px;
   }
+
+  #op_UI * {
+    margin: 0;
+    padding: 0;
+  }
   
-  .op-h1 {
+  #op_UI .op-h1 {
     color: var(--op-primary);
     font-size: 1.2em;
     font-weight: bold;
     margin: 0 !important;
   }
   
-  label#op_toggleShow {
+  #op_UI label#op_toggleShow {
     display: block;
     cursor: pointer;
   }
   
-  #op_topBar {
+  #op_UI #op_topBar {
     background: var(--op-primary);
     color: white;
     font-weight: bold;
@@ -231,7 +236,8 @@ const baseHTML = `
   #op_UI.loading .op-loading-spinner {
     display: block;
   }
-  .op-loading-spinner {
+  
+  #op_UI .op-loading-spinner {
     display: inline-block;
     border: .2em solid;
     border-top-color: transparent;
@@ -241,6 +247,7 @@ const baseHTML = `
     display: none;
     animation: spin 2s infinite linear;
   }
+  
   @keyframes spin {
     from {
         transform:rotate(0deg);
@@ -250,7 +257,7 @@ const baseHTML = `
     }
   }
   
-  #op_body {
+  #op_UI #op_body {
     display: none;
     padding: 1em;
     max-height: 40vh;
@@ -258,27 +265,27 @@ const baseHTML = `
     overflow-y: auto;
   }
   
-  #op_showBody:checked+#op_body {
+  #op_UI #op_showBody:checked+#op_body {
     display: block;
   }
   
-  #op_body>.op-page {
+  #op_UI #op_body>.op-page {
     display: none;
   }
   
-  #op_body[page="login"]>#op_login {
+  #op_UI #op_body[page="login"]>#op_login {
     display: block;
   }
   
-  #op_body[page="new"]>#op_new {
+  #op_UI #op_body[page="new"]>#op_new {
     display: block;
   }
   
-  #op_body[page="list"]>#op_list {
+  #op_UI #op_body[page="list"]>#op_list {
     display: block;
   }
   
-  #op_UI input:active {
+  #op_UI #op_UI input:active {
     border: 2px solid var(--op-primary);
   }
 
@@ -290,22 +297,26 @@ const baseHTML = `
     box-sizing: border-box;
   }
 
-  .op-cred-row {
+  #op_UI input[hidden] {
+    display: none !important;
+  }
+
+  #op_UI .op-cred-row {
     padding: .5em;
     border-bottom: 1px solid #0001;
     cursor: pointer;
     user-select: none;
   }
-  .op-cred-row:hover {
+  #op_UI .op-cred-row:hover {
     background: #00000007;
   }
   
   
-  .op-cred-account {
+  #op_UI .op-cred-account {
     color: #888;
   }
   
-  #op_newCredsLink {
+  #op_UI #op_newCredsLink {
     color: var(--op-primary);
     text-align: center;
     padding: .5em;
@@ -313,25 +324,25 @@ const baseHTML = `
     cursor: pointer;
   }
 
-  .op-input-group {
+  #op_UI .op-input-group {
     display: flex;
     align-items: center;
   }
 
   
-  #op_f_pw {
+  #op_UI #op_f_pw {
     -webkit-text-security: disc;
   }
-  #op_showPass:checked + #op_f_pw {
+  #op_UI #op_showPass:checked + #op_f_pw {
     -webkit-text-security: revert;
   }
  
-  .op-pw-lbl {
+  #op_UI .op-pw-lbl {
     display: flex;
     cursor: pointer;
   }
 
-  .op-checkbox {
+  #op_UI .op-checkbox {
     display: inline-block;
     border: 1px solid;
     width: 1em;
@@ -345,7 +356,7 @@ const baseHTML = `
     justify-content: center;
   }
 
-  #op_showPass:checked + #op_f_pw + .op-pw-lbl > .op-checkbox::before {
+  #op_UI #op_showPass:checked + #op_f_pw + .op-pw-lbl > .op-checkbox::before {
     content: '✔';
     color: var(--op-primary);
     font-size: 1.7em;

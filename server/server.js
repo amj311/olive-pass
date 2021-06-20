@@ -48,22 +48,13 @@ app.use(cors({
 let port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Server listening on port '+port));
 
-const MongoClient = require('mongodb').MongoClient
-var ObjectID = require('mongodb').ObjectID;
-const { encrypt, compare, decrypt } = require('../crypt');
 const Mailer = require('./Mailer');
+const DbProvider = require('./dao/DbProvider');
+const UserDao = require('./dao/UserDao');
 
-let db;
-let Users;
+
 // connect to the database
-MongoClient.connect(process.env.DB_URL+'/olive_pass', { useNewUrlParser: true, useUnifiedTopology: true }, (err,client)=>{
-  if (err) return console.error(err)
-  console.log('Connected to Database')
-  db = client.db("olive_pass");
-  Users = db.collection("users");
-  setupRoutes(app);
-});
-
+let dbProvider = new DbProvider();
 
 
 
@@ -78,7 +69,7 @@ const mailer = new Mailer({
 
 // Middleware
 function checkDbConnection(req, res, next) {
-  if (!db) {
+  if (!dbProvider.getDb()) {
     return res.status(503).send("Database is not connected.");
   }
   next();
@@ -90,10 +81,8 @@ async function authGaurd(req, res, next) {
     req.session.destroy();
     return;
   }
-  
-  let userData = await Users.findOne({ "_id":ObjectID(req.session.userId) }).then(async (result)=>{
-    return result;
-  });
+
+  let userData = await new UserDao().getById(req.session.userId);
   if (!userData) return res.status(401).send("Could not find user for session!")
   req.user = userData;
   req.session._garbage = Date();
@@ -103,28 +92,37 @@ async function authGaurd(req, res, next) {
 
 
 
-// Routes
-function setupRoutes(app) {
-  app.use("/api/", checkDbConnection);
-  
-  app.use('/api/check-auth', authGaurd);
-  app.get("/api/check-auth", (req,res)=>{
-    res.sendStatus(200);
-  })
-  
-  const auth = require('./routes/auth');
-  app.use('/api/auth', auth(db, mailer));
-  
-  
-  const creds = require('./routes/creds');
-  app.use('/api/creds', authGaurd);
-  app.use('/api/creds', creds(db));
-  
-  
-  
-  
-  app.use("/", function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).json({msg: 'Server Error', ok:false})
-  })
-}
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (req.headers['x-forwarded-proto'] !== 'https')
+        return res.redirect('https://' + req.headers.host + req.url);
+  }
+  return next();
+});
+
+app.use("/api/", checkDbConnection);
+
+app.use('/api/check-auth', authGaurd);
+app.get("/api/check-auth", (req,res)=>{
+  res.sendStatus(200);
+})
+
+
+const authRouter = require('./routes/auth');
+app.use('/api/auth', authRouter);
+
+
+// const account = require('./routes/account');
+// app.use('/api/account', authGaurd);
+// app.use('/api/account', account);
+
+
+const credsRouter = require('./routes/creds');
+app.use('/api/creds', authGaurd);
+app.use('/api/creds', credsRouter);
+
+
+app.use("/", function (err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).json({msg: 'Server Error', ok:false})
+})

@@ -1,4 +1,5 @@
 const express = require('express');
+const HandleError = require('../HandleError');
 const AuthService = require("../services/AuthService");
 
 
@@ -9,7 +10,7 @@ router.post("/register", async (req, res) => {
     req.session.userId = user._id;
     res.json(user);
   })
-    .catch(error => res.status(500).json(error));
+  .catch(err => HandleError(err,res));
 })
 
 router.post("/login", async (req, res) => {
@@ -17,7 +18,7 @@ router.post("/login", async (req, res) => {
     req.session.userId = user._id;
     res.json(user);
   })
-  .catch(error => res.status(500).json(error));
+  .catch(err => HandleError(err,res));
 })
 
 router.post("/logout", (req, res) => {

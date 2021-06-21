@@ -1,6 +1,7 @@
 var ObjectID = require('mongodb').ObjectID;
 const express = require('express');
 const CredsService = require("../services/CredsService");
+const HandleError = require('../HandleError');
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.get('/all', async (req, res) => {
   CredsService.getAllUserCreds(req.user._id).then(list => {
     res.status(200).json(list);
   })
-    .catch(err => { throw err });
+  .catch(err => HandleError(err,res));
 });
 
 
@@ -23,7 +24,7 @@ router.get('/d/:domain', async (req, res) => {
   CredsService.getAllUserCredsForDomain(req.user._id, req.params.domain).then(list => {
     res.status(200).json(list);
   })
-    .catch(err => { throw err });
+  .catch(err => HandleError(err,res));
 });
 
 
@@ -34,7 +35,7 @@ router.get('/p/:id', async (req, res) => {
   CredsService.getCredPassword(req.params.id).then(pw => {
     res.status(200).send(pw);
   })
-    .catch(err => { throw err });
+  .catch(err => HandleError(err,res));
 });
 
 
@@ -42,14 +43,11 @@ router.get('/p/:id', async (req, res) => {
 // Create a new creds entry
 router.post('/create', async (req, res) => {
   let data = req.body;
-  console.log("Create Creds", data);
-
   data.userId = req.user._id;
-
   CredsService.createCred(data).then(cred => {
     res.status(201).json(cred);
   })
-    .catch(err => { throw err });
+  .catch(err => HandleError(err,res));
 });
 
 
@@ -61,7 +59,7 @@ router.put('/update', async (req, res) => {
   CredsService.updateUserCred(id, req.body).then(result => {
     res.sendStatus(200);
   })
-    .catch(err => { throw err });
+  .catch(err => HandleError(err,res));
 });
 
 
@@ -73,7 +71,7 @@ router.delete('/:id', async (req, res) => {
   CredsService.deleteUserCred(id).then(result => {
     res.sendStatus(200);
   })
-    .catch(err => { throw err });
+  .catch(err => HandleError(err,res));
 });
 
 let credsRouter = router;

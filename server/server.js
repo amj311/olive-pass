@@ -48,22 +48,12 @@ app.use(cors({
 let port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Server listening on port '+port));
 
-const Mailer = require('./Mailer');
 const DbProvider = require('./dao/DbProvider');
 const UserDao = require('./dao/UserDao');
 
 
 // connect to the database
 let dbProvider = new DbProvider();
-
-
-
-// Setup Mailer
-const mailer = new Mailer({
-  domain: process.env.MAIL_DOMAIN,
-  apiKey: process.env.MAIL_API_KEY,
-  sender: process.env.MAIL_DEFAULT_SENDER,
-})
 
 
 
@@ -112,17 +102,18 @@ const authRouter = require('./routes/auth');
 app.use('/api/auth', authRouter);
 
 
-// const account = require('./routes/account');
-// app.use('/api/account', authGaurd);
-// app.use('/api/account', account);
+const account = require('./routes/account');
+app.use('/api/account', authGaurd);
+app.use('/api/account', account);
 
 
 const credsRouter = require('./routes/creds');
 app.use('/api/creds', authGaurd);
 app.use('/api/creds', credsRouter);
 
-
+const HandleError = require('./HandleError');
 app.use("/", function (err, req, res, next) {
+  console.log("Error Catch-all:",err.message);
   console.error(err.stack)
-  res.status(500).json({msg: 'Server Error', ok:false})
+  HandleError(error,res);
 })

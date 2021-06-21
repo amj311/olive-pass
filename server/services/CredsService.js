@@ -1,6 +1,8 @@
 const { encrypt, decrypt } = require('../../crypt');
 const CredsDao = require('../dao/CredsDao');
 const {Validator} = require('../../model/Validator');
+const Dao = require('../dao/Dao');
+const ServerError = require('../../model/ServerError');
 
 
 function validateCreds(data) {
@@ -37,7 +39,7 @@ module.exports = class CredsService {
         if (safe) arr = arr.map(c => packageCredsDocument(c));
         res(arr);
       })
-      .catch(error=>rej(error));
+      .catch(error=>rej(new ServerError()));
   
     });
   }
@@ -49,7 +51,7 @@ module.exports = class CredsService {
         if (safe) arr = arr.map(c => packageCredsDocument(c));
         res(arr);
       })
-      .catch(error=>rej(error));
+      .catch(error=>rej(new ServerError()));
     })
   }
 
@@ -57,10 +59,10 @@ module.exports = class CredsService {
     return new Promise((res,rej)=>{
       let credsDao = new CredsDao();
       credsDao.getById(credId).then(cred=>{
-        if (!cred) return rej("Could not find creds.");
+        if (!cred) return rej(new ServerError("Could not find credential.",404));
         res(cred.password ? decrypt(cred.password) : null);
       })
-      .catch(error=>rej(error));
+      .catch(error=>rej(new ServerError()));
     })
   }
 
@@ -68,23 +70,23 @@ module.exports = class CredsService {
     return new Promise((res,rej)=>{
       let validation = validateCreds(data);
       if (!validation.ok) {
-        return rej(validation.msg);
+        return rej(new ServerError(validation.msg,400));
       }
       let credsDao = new CredsDao();
       credsDao.create(encryptCreds(data)).then(cred=>{
         res(packageCredsDocument(cred));
       })
-      .catch(error=>rej(error));
+      .catch(error=>rej(new ServerError()));
     })
   }
 
   static updateUserCred(credId,data) {
     return new Promise((res,rej)=>{
       let credsDao = new CredsDao();
-      credsDao.update(credId,encryptCreds(data)).then(result=>{
+      credsDao.update(Dao.IdFilter(credId),encryptCreds(data)).then(result=>{
         res(result);
       })
-      .catch(error=>rej(error));
+      .catch(error=>rej(new ServerError()));
     });
   }
 
@@ -92,10 +94,10 @@ module.exports = class CredsService {
   static deleteUserCred(credId) {
     return new Promise((res,rej)=>{
       let credsDao = new CredsDao();
-      credsDao.deleteById(credId).then(result=>{
+      credsDao.delete(Dao.IdFilter(credId)).then(result=>{
         res(result);
       })
-      .catch(error=>rej(error));
+      .catch(error=>rej(new ServerError()));
     });
   }
 

@@ -3,6 +3,7 @@ const {Validator} = require('../../model/Validator');
 
 const { encrypt, decrypt, compare } = require('../../crypt');
 const Constants = require('../../model/Constants');
+const ServerError = require('../../model/ServerError');
 
 
 function validateRegistration(userData) {
@@ -44,41 +45,38 @@ function packageUserDocument(document) {
 
 module.exports = class AuthService {
 
-  static register(userData) {
-    return new Promise( async (res,rej)=>{
-      let validation = validateRegistration(req.body);
-      if (!validation.ok) return rej(validation.msg);
+  static async register(userData) {
+    let validation = validateRegistration(userData);
+    if (!validation.ok) throw new ServerError(validation.msg,400);
 
-      userData = encryptUserData(userData);
-      console.log("Registering...",userData)
+    userData = encryptUserData(userData);
+    console.log("Registering...",userData)
 
-      let userDao = new UserDao();
-      userDao.create(userData).then(user=>{
-        console.log("Success!");
-        res(packageUserDocument(user));
-      })
-      .catch((err)=>{
-        console.log(err.code, err.keyValue);
-        if (err.code = 11000) {
-          rej("An account already exists for "+err.keyValue.email+"!")
-        }
-        rej(error);
-      });
+    let userDao = new UserDao();
+    let user = await userDao.create(userData).then(user=>{
+      console.log("Success!");
+      return user;
+    })
+    .catch((err)=>{
+      console.log(err.code, err.keyValue);
+      if (err.code = 11000) {
+        throw new ServerError("An account already exists for "+err.keyValue.email+"!",400);
+      }
+      throw new ServerError();
     });
+    return packageUserDocument(user);
   }
 
-  static login(email,pw) {
-    return new Promise( async (res,rej)=>{
-      console.log("Attempting login...")
-      let userDao = new UserDao();
-      let userData = await userDao.findOne({ "email": email }).then(async (result)=>{
-        return result;
-      });
-      if (!userData) return rej("Could not find account for that email.")
-      if (!compare(pw, userData.password)) {
-        return rej("Invalid password!")
-      }
-      res(packageUserDocument(userData));
+  static async login(email,pw) {
+    console.log("Attempting login...")
+    let userDao = new UserDao();
+    let userData = await userDao.findOne({ "email": email }).then(async (result)=>{
+      return result;
     });
+    if (!userData) throw new ServerError("Could not find account for that email.",400)
+    if (!compare(pw, userData.password)) {
+      throw new ServerError("Invalid password!",400)
+    }
+    return packageUserDocument(userData);
   }
 }

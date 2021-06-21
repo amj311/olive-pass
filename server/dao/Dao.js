@@ -8,13 +8,9 @@ module.exports = class Dao {
     this.collection = this.provider.getDb().collection(this.collectionName);
     if (!this.collection) throw new Error("Not connected to database!");
   }
-
-  newId(id) {
-    return ObjectID(id);
-  }
-
+  
   async getById(id) {
-    return await this.collection.findOne({ "_id":this.newId(id) })
+    return await this.collection.findOne({ "_id":ObjectID(id) })
   }
 
   async findOne(filter) {
@@ -36,9 +32,9 @@ module.exports = class Dao {
     })
   }
   
-  async update(id,data) {
+  async update(filter,data) {
     delete data._id;
-    let result = await this.collection.updateOne({ "_id": this.newId(id) }, { $set: data })
+    let result = await this.collection.updateOne(filter, { $set: data })
     let success = result.modifiedCount >= 1;
     return new Promise((res,rej)=>{
       if (success) res(result);
@@ -46,12 +42,16 @@ module.exports = class Dao {
     })
   }
 
-  async deleteById(id) {
-    let result = await this.collection.deleteOne({ "_id": this.newId(id) })
+  async delete(filter) {
+    let result = await this.collection.deleteOne(filter)
     let success = result.deletedCount >= 1;
     return new Promise((res,rej)=>{
       if (success) res(result);
       else rej(result);
     })
+  }
+
+  static IdFilter(id) {
+    return { "_id": ObjectID(id) };
   }
 }

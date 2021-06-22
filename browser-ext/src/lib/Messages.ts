@@ -2,7 +2,9 @@ export enum Action {
   GET_DOMAIN_CREDS = "GET_DOMAIN_CREDS",
   CRED_PASS = "CRED_PASS",
   NEW_CRED = "NEW_CRED",
-  LOGIN = "LOGIN"
+  LOGIN = "LOGIN",
+  GET_STORAGE = "GET_STORAGE",
+  SET_STORAGE = "SET_STORAGE",
 }
 
 export enum Result {

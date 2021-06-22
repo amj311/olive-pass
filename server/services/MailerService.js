@@ -1,6 +1,3 @@
-const { encrypt, decrypt } = require('../../crypt');
-const CredsDao = require('../dao/CredsDao');
-const {Validator} = require('../../model/Validator');
 const Mailer = require("../Mailer")
 
 function newMailer() {

@@ -45,18 +45,6 @@ export default {
     loading: false,
   }},
 
-  beforeMount() {
-    this.loading = true;
-    axios.get(this.$store.state.api_url+"check-auth", {withCredentials:true})
-      .then(res=>{
-        this.$router.push("app");
-        this.loading = false;
-      })
-      .catch(err=>{
-        this.loading = false;
-        console.log(err)
-      })
-  },
   methods: {
     setMode(mode) {
       this.mode = mode;

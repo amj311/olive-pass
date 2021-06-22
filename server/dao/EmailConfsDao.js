@@ -2,7 +2,7 @@ const Dao = require("./Dao");
 
 module.exports = class EmailConfsDao extends Dao {
   constructor() {
-    super("creds");
+    super("email-confs");
   }
 
 }

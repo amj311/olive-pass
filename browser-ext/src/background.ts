@@ -31,6 +31,14 @@ chrome.runtime.onMessage.addListener( function(request:any, sender:chrome.runtim
       handler = createCreds;
       break;
     
+    case Action.GET_STORAGE:
+      handler = getStorage;
+      break;
+
+    case Action.SET_STORAGE:
+      handler = setStorage;
+      break;
+      
     default:
       handler = async function() {
         return new Response(Result.ERROR, "Invalid action.");
@@ -143,4 +151,22 @@ async function getCredPass(request: Request, sender: chrome.runtime.MessageSende
   let res:Response = await api("get","creds/p/"+request.body);
   if (res.result===Result.SUCCESS) return new Response(Result.SUCCESS,res.body.data);
   return res;
+}
+
+async function getStorage(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
+  return new Promise((res,rej)=>{
+    chrome.storage.local.get(request.body,(items:{[key:string]:any})=>{
+      console.log(items)
+      res(items);
+    })
+  })
+}
+
+
+async function setStorage(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
+  return new Promise((res,rej)=>{
+    chrome.storage.local.set(request.body,()=>{
+      res(true);
+    })
+  })
 }

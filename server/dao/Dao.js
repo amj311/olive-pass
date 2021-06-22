@@ -54,4 +54,8 @@ module.exports = class Dao {
   static IdFilter(id) {
     return { "_id": ObjectID(id) };
   }
+  
+  static ObjId(id) {
+    return ObjectID(id);
+  }
 }

@@ -83,6 +83,8 @@ async function authGaurd(req, res, next) {
 
 
 app.use((req, res, next) => {
+  console.log(req.method+" "+req.path, "\t|  ", new Date().toISOString());
+
   if (process.env.NODE_ENV === 'production') {
     if (req.headers['x-forwarded-proto'] !== 'https')
         return res.redirect('https://' + req.headers.host + req.url);
@@ -94,7 +96,7 @@ app.use("/api/", checkDbConnection);
 
 app.use('/api/check-auth', authGaurd);
 app.get("/api/check-auth", (req,res)=>{
-  res.sendStatus(200);
+  res.json(req.user);
 })
 
 

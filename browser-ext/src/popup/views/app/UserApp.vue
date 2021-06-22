@@ -37,20 +37,11 @@ data() { return {
   showMenu: false
 }},
 
-beforeMount() {
-  axios.get(this.$store.state.api_url+"check-auth", {withCredentials:true})
-    .then(res=>{
-    })
-    .catch(err=>{
-      if (err.response?.status === 401) {
-        console.warn("You are not logged in - rerouting to home.")
-        this.$router.push('/');
-      }
-      else console.log(err)
-    })
-},
 
 mounted() {
+  if (!this.$store.state.userData.isEmailConfirmed) {
+    this.$router.push({name:"EmailConfirm"});
+  }
 },
 
 methods: {
@@ -62,6 +53,7 @@ methods: {
     if (!confirm("Are your sure you want to log out of OlivePass?")) return;
     axios.post(this.$store.state.api_url+"auth/logout")
       .then(res=>{
+        this.$store.commit('logout');
         chrome.cookies.remove({url:this.$store.state.api_url,name:"op-session"});
         this.$router.push("/");
       })
@@ -75,6 +67,7 @@ methods: {
 
 <style scoped lang="scss">
 #appWrapper {
+  background: #fff;
   position: relative;
   height: 100%;
   width: 100%;

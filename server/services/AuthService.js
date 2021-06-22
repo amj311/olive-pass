@@ -1,9 +1,12 @@
 const UserDao = require('../dao/UserDao');
 const {Validator} = require('../../model/Validator');
 
-const { encrypt, decrypt, compare } = require('../../crypt');
+const { encrypt, compare } = require('../../crypt');
 const Constants = require('../../model/Constants');
 const ServerError = require('../../model/ServerError');
+const OTCDao = require('../dao/OTCDao');
+const MailerService = require('./MailerService');
+const Dao = require('../dao/Dao');
 
 
 function validateRegistration(userData) {
@@ -41,7 +44,9 @@ function packageUserDocument(document) {
   return user;
 }
 
-
+function getOtcDao() {
+  return new OTCDao('login-otc',Constants.LoginCodeLength,Constants.LoginCodeExpiration);
+}
 
 module.exports = class AuthService {
 
@@ -78,5 +83,53 @@ module.exports = class AuthService {
       throw new ServerError("Invalid password!",400)
     }
     return packageUserDocument(userData);
+  }
+
+
+
+
+
+  // EMAIL OTC LOGIN
+  static async newEmailOtcLogin(userId) {
+    let userDao = new UserDao();
+    let user = await userDao.getById(userId);
+    if (!user) throw new ServerError("No such user!",404);
+
+    let otcDao = getOtcDao();
+    let otc = await otcDao.newOTC(Dao.ObjId(userId));
+
+    let msg = {
+      to: user.email,
+      subject: "Your Login Code",
+      html: `
+          <h1>Your Login Code</h1>
+          <p><b>${otc.code}</b></p>
+          <p>This one-time login code was requested for your OlivePass account at ${new Date().toUTCString()}. If you did not request it, please update your passwords and alert our support team.</p>
+        `
+    }
+
+    let mailer = MailerService.getMailer();
+    await mailer.send(msg, (error, body) => {
+      if (error) {
+        console.log(error);
+        throw new ServerError();
+      }
+      console.log(body)
+    })
+  }
+
+
+
+  static async attemptOtcLogin(userId,tryCode) {
+    let otcDao = getOtcDao();
+    let otc = await otcDao.checkCode(tryCode,Dao.ObjId(userId)).catch(e=>{
+      throw new ServerError("That code either does not exist or has expired.",404);
+    });
+
+    
+    let userDao = new UserDao();
+    let user = await userDao.getById(userId);
+    if (!user) throw new ServerError("No such user!",404);
+    return packageUserDocument(user);
   }
 }

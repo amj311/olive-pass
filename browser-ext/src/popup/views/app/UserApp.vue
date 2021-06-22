@@ -1,12 +1,13 @@
 <template>
   <div id="appWrapper">
     <div id="appHeader">
-      <b>OlivePass</b>
+      <b class="header-item">OlivePass</b>
 
       <div id="topMenu">
-        <i class="fa fa-plus"></i>
-        <i class="fa fa-cog"></i>
-        <i class="fa fa-sign-out-alt" @click="logout"></i>
+        <router-link :to="{name: 'Creds'}"><div class="header-item nav-link"><i class="fa fa-key"></i></div></router-link>
+        <div class="header-item nav-link"><i class="fa fa-plus"></i></div>
+        <div class="header-item nav-link"><i class="fa fa-cog"></i></div>
+        <div class="header-item nav-link" @click="logout"><i class="fa fa-sign-out-alt"></i></div>
       </div>
     </div>
     <div id="appBody">
@@ -36,20 +37,11 @@ data() { return {
   showMenu: false
 }},
 
-beforeMount() {
-  axios.get(this.$store.state.api_url, {withCredentials:true})
-    .then(res=>{
-    })
-    .catch(err=>{
-      if (err.response?.status === 401) {
-        console.warn("You are not logged in - rerouting to home.")
-        this.$router.push('/');
-      }
-      else console.log(err)
-    })
-},
 
 mounted() {
+  if (!this.$store.state.userData.isEmailConfirmed) {
+    this.$router.push({name:"EmailConfirm"});
+  }
 },
 
 methods: {
@@ -58,8 +50,11 @@ methods: {
   },
 
   logout() {
-    axios.post(this.$store.state.api_url+"logout")
+    if (!confirm("Are your sure you want to log out of OlivePass?")) return;
+    axios.post(this.$store.state.api_url+"auth/logout")
       .then(res=>{
+        this.$store.commit('logout');
+        chrome.cookies.remove({url:this.$store.state.api_url,name:"op-session"});
         this.$router.push("/");
       })
       .catch(err=>{
@@ -70,8 +65,9 @@ methods: {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 #appWrapper {
+  background: #fff;
   position: relative;
   height: 100%;
   width: 100%;
@@ -86,14 +82,36 @@ methods: {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .5rem;
   font-size: 1.2rem;
 }
 
-#topMenu i[class*="fa "] {
-  margin-left: .5em;
+.header-item {
+  padding: .5em;
+}
+
+#topMenu {
+  display: flex;
+}
+.nav-link {
+  color: white;
   cursor: pointer;
-} 
+
+  a {
+    color: white;
+  }
+
+  i[class*=" fa-"] {
+    transform: scale(.9);
+  }
+
+  &:hover {
+    background: #0001;
+  }
+}
+.router-link-active {
+  background: #0001;
+  pointer-events: none;
+}
 
 #appBody {
   position: relative;

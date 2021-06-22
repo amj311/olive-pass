@@ -42,9 +42,6 @@ export default class OpUi {
     let newCredCancel = <HTMLButtonElement>this.doc.getElementById("op_newCredCancel");
     newCredCancel.addEventListener("click",()=>this.setPage("list"))
     
-    let newCredUrl = <HTMLInputElement>this.doc.getElementById("op_f_url");
-    newCredUrl.value = this.doc.location.href;
-    
     this.isRendered = true;
   }
 
@@ -69,17 +66,12 @@ export default class OpUi {
   }
 
   doLogin(): any {
-    let acctVal = (<HTMLInputElement>this.doc.getElementById("op_l_acct")).value;
-    let passVal = (<HTMLInputElement>this.doc.getElementById("op_l_pw")).value;
-    let req = new Request(Action.LOGIN, {
-      email: acctVal, password: passVal
-    });
-    this.presenter.doLogin(req);
+    this.presenter.openLogin();
   }
 
   saveNew(): any {
     let nameVal = (<HTMLInputElement>this.doc.getElementById("op_f_nn")).value;
-    let urlVal = (<HTMLInputElement>this.doc.getElementById("op_f_url")).value;
+    let urlVal = this.doc.location.href;
     let acctVal = (<HTMLInputElement>this.doc.getElementById("op_f_acct")).value;
     let passVal = (<HTMLInputElement>this.doc.getElementById("op_f_pw")).value;
     let req = new Request(Action.NEW_CRED, {
@@ -134,7 +126,7 @@ export default class OpUi {
 export interface OpUiPresenter {
   isLoggedIn(): boolean;
   saveNew(req: Request): void;
-  doLogin(req:Request): void;
+  openLogin(): void;
   fetchCreds(): void;
   onCredSelect(cred:Credentials): void;
 }
@@ -153,12 +145,10 @@ const baseHTML = `
   </label>
   <input type="checkbox" id="op_showBody" checked hidden />
   <div id="op_body" page>
-    <div id="op_login" class="op-page">
-      <div class="op-h1">Log In</div>
+    <div id="op_login" class="op-page" style="text-align: center">
+      <div class="op-h1">You are logged out of OlivePass</div>
+      <br>
       <p>
-        <input type="text" id="op_l_acct" placeholder="Account" />
-        <input type="text" id="op_l_pw" placeholder="Password" />
-        <br>
         <button id="op_loginButton">Log In</button>
       </p>
     </div>
@@ -179,10 +169,15 @@ const baseHTML = `
     <div id="op_new" class="op-page">
       <div class="op-h1">New credentials:</div>
       <p>
-        <input type="text" id="op_f_nn" placeholder="Nickname" />
-        <input type="text" id="op_f_url" placeholder="Url" />
+        <input type="text" id="op_f_nn" placeholder="Nickname (Optional)" />
         <input type="text" id="op_f_acct" placeholder="Account" />
-        <input type="text" id="op_f_pw" placeholder="Password" />
+        <div class="op-input-group">
+          <input type="checkbox" id="op_showPass" hidden>
+          <input type="text" id="op_f_pw" placeholder="Password">
+          <label for="op_showPass" class="op-pw-lbl">
+            <div class="op-checkbox"></div> Show
+          </label>
+        </div>
         <br>
         <button id="op_newCredButton">Save</button>
         <button id="op_newCredCancel">Cancel</button>
@@ -209,20 +204,25 @@ const baseHTML = `
     z-index: 9999999999;
     font-size: 14px;
   }
+
+  #op_UI * {
+    margin: 0;
+    padding: 0;
+  }
   
-  .op-h1 {
+  #op_UI .op-h1 {
     color: var(--op-primary);
     font-size: 1.2em;
     font-weight: bold;
     margin: 0 !important;
   }
   
-  label#op_toggleShow {
+  #op_UI label#op_toggleShow {
     display: block;
     cursor: pointer;
   }
   
-  #op_topBar {
+  #op_UI #op_topBar {
     background: var(--op-primary);
     color: white;
     font-weight: bold;
@@ -236,7 +236,8 @@ const baseHTML = `
   #op_UI.loading .op-loading-spinner {
     display: block;
   }
-  .op-loading-spinner {
+  
+  #op_UI .op-loading-spinner {
     display: inline-block;
     border: .2em solid;
     border-top-color: transparent;
@@ -246,6 +247,7 @@ const baseHTML = `
     display: none;
     animation: spin 2s infinite linear;
   }
+  
   @keyframes spin {
     from {
         transform:rotate(0deg);
@@ -255,7 +257,7 @@ const baseHTML = `
     }
   }
   
-  #op_body {
+  #op_UI #op_body {
     display: none;
     padding: 1em;
     max-height: 40vh;
@@ -263,27 +265,27 @@ const baseHTML = `
     overflow-y: auto;
   }
   
-  #op_showBody:checked+#op_body {
+  #op_UI #op_showBody:checked+#op_body {
     display: block;
   }
   
-  #op_body>.op-page {
+  #op_UI #op_body>.op-page {
     display: none;
   }
   
-  #op_body[page="login"]>#op_login {
+  #op_UI #op_body[page="login"]>#op_login {
     display: block;
   }
   
-  #op_body[page="new"]>#op_new {
+  #op_UI #op_body[page="new"]>#op_new {
     display: block;
   }
   
-  #op_body[page="list"]>#op_list {
+  #op_UI #op_body[page="list"]>#op_list {
     display: block;
   }
   
-  #op_UI input:active {
+  #op_UI #op_UI input:active {
     border: 2px solid var(--op-primary);
   }
 
@@ -295,22 +297,26 @@ const baseHTML = `
     box-sizing: border-box;
   }
 
-  .op-cred-row {
+  #op_UI input[hidden] {
+    display: none !important;
+  }
+
+  #op_UI .op-cred-row {
     padding: .5em;
     border-bottom: 1px solid #0001;
     cursor: pointer;
     user-select: none;
   }
-  .op-cred-row:hover {
+  #op_UI .op-cred-row:hover {
     background: #00000007;
   }
   
   
-  .op-cred-account {
+  #op_UI .op-cred-account {
     color: #888;
   }
   
-  #op_newCredsLink {
+  #op_UI #op_newCredsLink {
     color: var(--op-primary);
     text-align: center;
     padding: .5em;
@@ -318,8 +324,44 @@ const baseHTML = `
     cursor: pointer;
   }
 
-  #op_l_pw, #op_f_pw {
+  #op_UI .op-input-group {
+    display: flex;
+    align-items: center;
+  }
+
+  
+  #op_UI #op_f_pw {
     -webkit-text-security: disc;
+  }
+  #op_UI #op_showPass:checked + #op_f_pw {
+    -webkit-text-security: revert;
+  }
+ 
+  #op_UI .op-pw-lbl {
+    display: flex;
+    cursor: pointer;
+  }
+
+  #op_UI .op-checkbox {
+    display: inline-block;
+    border: 1px solid;
+    width: 1em;
+    max-width: 1em;
+    height: 1em;
+    max-height: 1em;
+    overflow: visible;
+    margin: 0 .25em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #op_UI #op_showPass:checked + #op_f_pw + .op-pw-lbl > .op-checkbox::before {
+    content: '✔';
+    color: var(--op-primary);
+    font-size: 1.7em;
+    font-weight: bold;
+    transform: translateY(-.1em);
   }
   </style>
 

@@ -24,13 +24,21 @@ chrome.runtime.onMessage.addListener( function(request:any, sender:chrome.runtim
       break;
 
     case Action.LOGIN:
-      handler = attemptLogin;
+      attemptLogin(sendResponse);
       break;
     
     case Action.NEW_CRED:
       handler = createCreds;
       break;
     
+    case Action.GET_STORAGE:
+      handler = getStorage;
+      break;
+
+    case Action.SET_STORAGE:
+      handler = setStorage;
+      break;
+      
     default:
       handler = async function() {
         return new Response(Result.ERROR, "Invalid action.");
@@ -38,7 +46,8 @@ chrome.runtime.onMessage.addListener( function(request:any, sender:chrome.runtim
       break;
   }
   
-  handler(request, sender)
+  if (handler) {
+    handler(request, sender)
     .then(res=>{
       console.log("RESPONSE "+msgId, res);
       sendResponse(res);
@@ -47,6 +56,10 @@ chrome.runtime.onMessage.addListener( function(request:any, sender:chrome.runtim
       console.log("RESPONSE "+msgId, err);
       sendResponse(new Response(Result.ERROR, err));
     });
+  }
+  else {
+    console.log("RESPONSE "+msgId, "Handled by method.");
+  }
 
   return true; // Inform Chrome that we will make a delayed sendResponse
 });
@@ -54,7 +67,9 @@ chrome.runtime.onMessage.addListener( function(request:any, sender:chrome.runtim
 
 async function api(method:"get"|"post"|"put"|"delete", path:string, body?:any): Promise<Response> {
   let config = {withCredentials:true};
-  let apiRoot = "https://olive-pass.herokuapp.com/api/";
+  let apiRoot = process.env.NODE_ENV === "development" ?
+    `http://localhost:${process.env.PORT || 3000}/api/` :
+    "https://olive-pass.herokuapp.com/api/";
 
   let url= apiRoot+path;
   let handler: any;
@@ -83,7 +98,6 @@ async function api(method:"get"|"post"|"put"|"delete", path:string, body?:any): 
 
   let res = await handler(...args)
     .then((res:AxiosResponse<any>)=>{
-      console.log("Res:", res);
       return new Response(Result.SUCCESS, res);
     })
     .catch((err:AxiosError)=>{
@@ -109,10 +123,20 @@ async function getDomainCreds(request: Request, sender: chrome.runtime.MessageSe
   return res;
 }
 
-async function attemptLogin(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
-  let res:Response = await api("post","login",request.body);
-  if (res.result===Result.SUCCESS) return new Response(Result.SUCCESS,res.body.data);
-  return res;
+async function attemptLogin(sendResponse: (res:Response)=>any): Promise<any> {
+  let win = window.open("popup.html", "OlivePass Login", "width=350,height=400,status=no,scrollbars=no,resizable=no");
+  if (win) win.document.title = "OlivePass Login";
+  let timer = setInterval(function() { 
+    if (win?.closed) {
+      clearInterval(timer);
+      sendResponse(new Response(Result.ERROR, "Window was closed!"));
+    }
+    if(win?.location.href.includes("app")) {
+        clearInterval(timer);
+        win.close();
+        sendResponse(new Response(Result.SUCCESS));
+    }
+  }, 1000);
 }
 
 async function createCreds(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
@@ -127,4 +151,22 @@ async function getCredPass(request: Request, sender: chrome.runtime.MessageSende
   let res:Response = await api("get","creds/p/"+request.body);
   if (res.result===Result.SUCCESS) return new Response(Result.SUCCESS,res.body.data);
   return res;
+}
+
+async function getStorage(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
+  return new Promise((res,rej)=>{
+    chrome.storage.local.get(request.body,(items:{[key:string]:any})=>{
+      console.log(items)
+      res(items);
+    })
+  })
+}
+
+
+async function setStorage(request: Request, sender: chrome.runtime.MessageSender): Promise<any> {
+  return new Promise((res,rej)=>{
+    chrome.storage.local.set(request.body,()=>{
+      res(true);
+    })
+  })
 }

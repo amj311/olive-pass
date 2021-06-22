@@ -31,7 +31,7 @@ import CredRow from './CredRow.vue';
 
 export default {
 components: { Spinner, CredRow },
-name: "Dashboard",
+name: "Creds",
 data() { return {
   loadingCreds: false,
   creds: [],
@@ -171,6 +171,9 @@ input#filterField {
   padding: .5em;
   font-weight: bold;
   background: #0001;
+}
+.domainCredsList:not([open]) summary {
+    border-bottom: 1px solid #0002;
 }
 
 .credRow {

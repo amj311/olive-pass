@@ -53,8 +53,8 @@ class Presenter implements OpUiPresenter {
   saveNew(req: Request): void {
     saveCreds(req);
   }
-  doLogin(req: Request): void {
-    doLogin(req);
+  openLogin(): void {
+    openLogin();
   }
   fetchCreds(): void {
     throw new Error('Method not implemented.');
@@ -65,7 +65,7 @@ class Presenter implements OpUiPresenter {
 }
 
 const fieldsFilter = new FieldsFilter();
-const passFieldWatcher = new QueryWatcher('input[type="password"]');
+const passFieldWatcher = new QueryWatcher(passwordSelector);
 const acctFieldWatcher = new QueryWatcher(acctnameSelector);
 let acctField: HTMLInputElement;
 let passField: HTMLInputElement;
@@ -92,8 +92,6 @@ ready(() => {
   passFieldWatcher.beginWatching();
   acctFieldWatcher.beginWatching();
 });
-
-
 
 
 
@@ -158,8 +156,8 @@ function setUpInputValueListener(f: HTMLInputElement, onUpdate:(val:string)=>any
 }
 
 
-function doLogin(req:Request) {
-  sendRequest(req, function(response:Response) {
+function openLogin() {
+  sendRequest(new Request(Action.LOGIN), function(response:Response) {
     if (response.result === Result.SUCCESS) {
       loggedIn = true;
       getAndShowCreds();
@@ -186,8 +184,9 @@ function insertCred(cred: Credentials) {
   sendRequest(new Request(Action.CRED_PASS, cred._id), (res)=>{
     if (res.result === Result.SUCCESS) {
       acctField.value = cred.accountIdentifier;
-      passField.value = res.body;  
-      ui.hide();  
+      passField.value = res.body;
+      passField.focus();
+      ui.hide();
     }
   })
 }

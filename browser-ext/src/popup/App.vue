@@ -27,8 +27,9 @@ export default {
     this.loading = true;
     axios.get(this.$store.state.api_url+"check-auth", {withCredentials:true})
       .then(res=>{
+        console.log("Is authenticated!", res.data)
         this.$store.commit('userData',res.data);
-        this.$router.push("app");
+        this.$nextTick(()=>this.$router.push("app"));
       })
       .catch(err=>{
         if (err.response?.status === 401) {

@@ -39,8 +39,13 @@ data() { return {
 
 
 mounted() {
+  if (!this.$store.state.userData) {
+    this.$router.push('/');
+    return;
+  }
   if (!this.$store.state.userData.isEmailConfirmed) {
     this.$router.push({name:"EmailConfirm"});
+    return;
   }
 },
 

@@ -60,8 +60,7 @@ export default {
         password: this.password
       }, {withCredentials:true})
       .then(res=>{
-        console.log(res.data)
-        this.$router.push({name: "Creds"})
+        this.onLoginSuccess(res.data);
       })
       .catch(({response}) => {
         console.log(response.data);
@@ -88,12 +87,16 @@ export default {
         code
       }, {withCredentials:true})
       .then(res=>{
-        console.log(res.data)
-        this.$router.push('/app')
+        this.onLoginSuccess(res.data);
       })
       .catch(({response}) => {
         console.log(response.data);
       })
+    },
+
+    onLoginSuccess(user) {
+      this.$store.commit('userData',user);
+      this.$nextTick(()=>this.$router.push("app"));
     }
   }
 }

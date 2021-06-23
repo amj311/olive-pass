@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CredForm :cred="cred" :loading="loading" :mode="'edit'" @submit="submit" @cancel="cancel" />
+    <CredForm :cred="cred" :loading="loading" :mode="'add'" @submit="submit" @cancel="cancel" />
   </div>
 </template>
 
@@ -8,50 +8,43 @@
 <script>
 import axios from 'axios'
 import CredForm from '../../components/CredForm.vue';
+import Credentials from '../../../../../model/Credentials'
 
 export default {
 components: { CredForm },
-props: ["credId"],
-name: "EditCred",
+props: ["template"],
+name: "AddCred",
 data() { return {
   loading: false,
   cred: null,
 }},
 
 beforeMount() {
-  this.getCred();
+  this.createCred();
 },
 
 mounted() {
 },
 
 methods: {
-  async getCred() {
+  async createCred() {
     this.loading = true;
-    axios.get(this.$store.state.api_url+"creds/"+this.credId, {withCredentials:true})
-    .then(async res=>{
-      let cred = res.data;
-      let pass = await axios.get(this.$store.state.api_url+"creds/p/"+cred._id, {withCredentials:true}).then(res=>{
-        return res.data;
-      });
-      cred.password = pass;
-      this.cred = cred;
-    })
-    .catch(({response}) => {
-      console.log(response.data);
-    })
-    .finally(()=>{
-      this.loading = false;
-    })
+    this.cred = new Credentials(this.template);
+    delete this.cred._id;
+    this.loading = false;
   },
 
   submit() {
     this.loading = true;
-    axios.put(this.$store.state.api_url+"creds/update", this.cred, {withCredentials:true})
+    axios.post(this.$store.state.api_url+"creds/create", this.cred, {withCredentials:true})
     .then(res=>{
       this.$store.state.alertManager.addAlert({message:"Saved!"});
+      this.$router.push({name:"EditCred", params:{credId:res.data._id}});
     })
-    .catch(err=>console.log(err))
+    .catch(err=>{
+      console.log(err.response)
+      this.$store.state.alertManager.addAlert({message:err.response.data});
+    })
     .finally(this.loading = false);
   },
 

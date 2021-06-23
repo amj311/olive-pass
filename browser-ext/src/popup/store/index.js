@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { Request, Action } from '../../lib/Messages'
+import AlertManager from '../AlertManager'
 
 Vue.use(Vuex)
 
@@ -10,6 +11,7 @@ export default new Vuex.Store({
       `http://localhost:${process.env.PORT || 3000}/api/` :
       process.env.API_URL,
     userData: null,
+    alertManager: new AlertManager(),
   },
   mutations: {
     userData(state, data) {

@@ -31,6 +31,7 @@
         <button @click="submit">Save</button>
         <button @click="cancel">Cancel</button>
         <button v-if="mode === 'edit'" @click="deleteCred">Delete</button>
+        <button v-if="mode === 'edit'" @click="copyCred">Copy</button>
       </div>
     </div>
 
@@ -62,20 +63,17 @@ methods: {
     if (!confirm(confirmStr)) return;
 
     axios.delete(this.$store.state.api_url+"creds/"+this.cred._id, {withCredentials:true})
-      .then(res=>{
-        this.$router.push({name:"Creds"});
-      })
-      .catch(({response}) => {
-        console.log(response.data);
-      })
+    .then(res=>{
+      this.$store.state.alertManager.addAlert({message:"Deleted!"});
+      this.$router.push({name:"Creds"});
+    })
+    .catch(({response}) => {
+      console.log(response.data);
+    })
   },
 
-  truncateUrl(url) {
-    let trunc = url;
-    if (trunc.startsWith("http")) trunc = trunc.split("//")[1];
-    if (trunc.includes("/")) trunc = trunc.split("/")[0];
-    if (trunc.startsWith("www.")) trunc = trunc.split("www.")[1];
-    return trunc;
+  copyCred() {
+    this.$router.push({name:"AddCred", params:{template:this.cred}});
   },
 
   submit() {
@@ -96,6 +94,7 @@ methods: {
 <style scoped>
 #formHeader {
   text-transform: capitalize;
+  color: var(--primary);
 }
 
 .form-input-row {

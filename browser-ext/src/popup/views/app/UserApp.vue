@@ -5,7 +5,7 @@
 
       <div id="topMenu">
         <router-link :to="{name: 'Creds'}"><div class="header-item nav-link"><i class="fa fa-key"></i></div></router-link>
-        <div class="header-item nav-link"><i class="fa fa-plus"></i></div>
+        <router-link :to="{name: 'AddCred'}"><div class="header-item nav-link"><i class="fa fa-plus"></i></div></router-link>
         <div class="header-item nav-link"><i class="fa fa-cog"></i></div>
         <div class="header-item nav-link" @click="logout"><i class="fa fa-sign-out-alt"></i></div>
       </div>

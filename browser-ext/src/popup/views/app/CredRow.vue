@@ -2,8 +2,10 @@
   <div>
 
     <div class="credRow">
-      <div class="cred-cell nickname" ><b>{{cred.nickname}}</b></div>
-      <div class="cred-cell account" >{{cred.accountIdentifier}}</div>
+      <div class="cred-cell label">
+        <span class="label-primary ellipsis">{{cred.nickname || cred.accountIdentifier}}</span>
+        <span class="label-secondary ellipsis" v-if="cred.nickname">{{cred.accountIdentifier}}</span>
+      </div>
       <div class="cred-cell password" >{{cred.password || "••••••"}}</div>
       <div class="cred-cell toggle">
         <Spinner v-if="loadingPass" :size="'.8em'" />
@@ -89,45 +91,33 @@ methods: {
 </script>
 
 <style scoped>
-th {
-  text-align: left !important;
-}
-.favi {
-  height: 16px;
-  width: 16px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-input#filterField {
-    font-size: 1.25em;
-    width: 100%;
-    padding: .25rem;
-    box-sizing: border-box;
-}
-
-.domainCredsList summary {
-  padding: .5em;
-  font-weight: bold;
-  background: #0001;
-}
-
 .credRow {
   display: grid;
-  grid-template-columns: 1fr 1fr 5em 2em 2em;
+  grid-template-columns: 1fr 5em 2em 2em;
   border-bottom: 1px solid #0002;
 }
 .credRow:hover {
   background: #00000007;
 }
 
+.label-primary {
+  flex-grow: 1;
+  font-weight: bold;
+}
+
+.label-secondary {
+  width: 50%;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .credRow .cred-cell {
   display:flex;
   place-items: center;
   padding: 5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .cred-cell.url {

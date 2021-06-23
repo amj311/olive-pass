@@ -6,12 +6,12 @@
         <span class="label-primary ellipsis">{{cred.nickname || cred.accountIdentifier}}</span>
         <span class="label-secondary ellipsis" v-if="cred.nickname">{{cred.accountIdentifier}}</span>
       </div>
-      <div class="cred-cell password" >{{cred.password || "••••••"}}</div>
+      <div class="cred-cell password" ><span class="ellipsis">{{cred.password || "••••••"}}</span></div>
       <div class="cred-cell toggle">
         <Spinner v-if="loadingPass" :size="'.8em'" />
         <i v-else @click="togglePassword()" :class="`fa fa-eye${cred.password===''?'':'-slash'}`"></i>
       </div>
-      <div class="cred-cell toggle" @click="editCred()">
+      <div class="cred-cell edit" @click="editCred()">
         <i class="fas fa-pen"></i>
       </div>      
     </div>
@@ -93,7 +93,7 @@ methods: {
 <style scoped>
 .credRow {
   display: grid;
-  grid-template-columns: 1fr 5em 1.8em 1.8em;
+  grid-template-columns: 1fr 6em 1.8em 1.8em;
   border-bottom: 1px solid #0002;
 }
 .credRow:hover {

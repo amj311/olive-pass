@@ -5,6 +5,17 @@ const HandleError = require('../HandleError');
 
 const router = express.Router();
 
+
+// Fetch one creds
+router.get('/:id', async (req, res, next) => {
+  if (req.params.id === "all") return next('route');
+  CredsService.getCredById(req.params.id).then(cred => {
+    res.json(cred);
+  })
+  .catch(err => HandleError(err,res));
+});
+
+
 // Fetch all creds
 router.get('/all', async (req, res) => {
   console.log("Get all Creds for user " + req.user._id);

@@ -69,7 +69,7 @@ async function api(method:"get"|"post"|"put"|"delete", path:string, body?:any): 
   let config = {withCredentials:true};
   let apiRoot = process.env.NODE_ENV === "development" ?
     `http://localhost:${process.env.PORT || 3000}/api/` :
-    "https://olive-pass.herokuapp.com/api/";
+    process.env.API_URL;
 
   let url= apiRoot+path;
   let handler: any;

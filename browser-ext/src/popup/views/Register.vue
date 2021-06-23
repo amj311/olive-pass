@@ -37,6 +37,7 @@ export default {
       })
       .catch(({response}) => {
         console.log(response.data);
+        this.$store.state.alertManager.addAlert({message:response.data});
       })
     }
   }

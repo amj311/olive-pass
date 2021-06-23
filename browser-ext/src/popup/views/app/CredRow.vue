@@ -6,13 +6,13 @@
         <span class="label-primary ellipsis">{{cred.nickname || cred.accountIdentifier}}</span>
         <span class="label-secondary ellipsis" v-if="cred.nickname">{{cred.accountIdentifier}}</span>
       </div>
-      <div class="cred-cell password" >{{cred.password || "••••••"}}</div>
+      <div class="cred-cell password" ><span class="ellipsis">{{cred.password || "••••••"}}</span></div>
       <div class="cred-cell toggle">
         <Spinner v-if="loadingPass" :size="'.8em'" />
         <i v-else @click="togglePassword()" :class="`fa fa-eye${cred.password===''?'':'-slash'}`"></i>
       </div>
-      <div class="cred-cell toggle" @click="deleteCred()">
-        <i class="fa fa-trash"></i>
+      <div class="cred-cell edit" @click="editCred()">
+        <i class="fas fa-pen"></i>
       </div>      
     </div>
   </div>
@@ -21,7 +21,7 @@
 
 <script>
 import axios from 'axios'
-import Spinner from '../../../components/Spinner.vue';
+import Spinner from '../../components/Spinner.vue';
 
 export default {
 components: { Spinner },
@@ -57,8 +57,8 @@ methods: {
     })
   },
 
-  deleteCred() {
-    this.$emit("delete", this.cred);
+  editCred() {
+    this.$router.push({name:'EditCred',params:{credId:this.cred._id}});
   },
 
   truncateUrl(url) {
@@ -93,21 +93,14 @@ methods: {
 <style scoped>
 .credRow {
   display: grid;
-  grid-template-columns: 1fr 5em 2em 2em;
+  grid-template-columns: 1fr 6em 1.8em 1.8em;
   border-bottom: 1px solid #0002;
 }
 .credRow:hover {
   background: #00000007;
 }
 
-.label-primary {
-  flex-grow: 1;
-  font-weight: bold;
-}
 
-.label-secondary {
-  width: 50%;
-}
 
 .ellipsis {
   overflow: hidden;
@@ -118,6 +111,15 @@ methods: {
   display:flex;
   place-items: center;
   padding: 5px;
+}
+
+.label-primary {
+  flex-grow: 1;
+  font-weight: bold;
+}
+
+.label-secondary {
+  width: 50%;
 }
 
 .cred-cell.url {

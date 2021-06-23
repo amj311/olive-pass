@@ -6,13 +6,15 @@
     <p v-show="loadingCreds" style="text-align: center">
       <Spinner :size="'2em'" :color="'var(--primary)'" />
     </p>
-    <div v-for="domain in credsByDomain" :key="domain.host">
-      <details class="domainCredsList" open>
-        <summary>{{domain.host}}</summary>
+    <div id="credsList" v-if="credsByDomain.length > 0">
+      <div v-for="domain in credsByDomain" :key="domain.host">
+        <details class="domainCredsList" open>
+          <summary>{{domain.host}}</summary>
 
-          <!-- eslint-disable-next-line -->
-          <CredRow v-for="cred in domain.creds" :key="cred._id" :cred="cred" @delete="deleteCred(cred)" />
-      </details>
+            <!-- eslint-disable-next-line -->
+            <CredRow v-for="cred in domain.creds" :key="cred._id" :cred="cred" @delete="deleteCred(cred)" />
+        </details>
+      </div>
     </div>
 
     <div v-if="credsByDomain.length === 0 && !loadingCreds" style="text-align:center">
@@ -26,7 +28,7 @@
 
 <script>
 import axios from 'axios'
-import Spinner from '../../../components/Spinner.vue';
+import Spinner from '../../components/Spinner.vue';
 import CredRow from './CredRow.vue';
 
 export default {
@@ -149,6 +151,10 @@ methods: {
 </script>
 
 <style scoped>
+#credsList {
+  margin: 1rem -1rem -1rem;
+}
+
 th {
   text-align: left !important;
 }

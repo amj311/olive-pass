@@ -32,6 +32,18 @@ function packageCredsDocument(document) {
 }
 
 module.exports = class CredsService {
+  static getCredById(credId, safe=true) {
+    return new Promise((res,rej)=>{
+      let credsDao = new CredsDao();
+      credsDao.getById(credId).then(c=>{
+        if (safe) c = packageCredsDocument(c);
+        res(c);
+      })
+      .catch(error=>rej(new ServerError()));
+  
+    });
+  }
+  
   static getAllUserCreds(userId, safe=true) {
     return new Promise((res,rej)=>{
       let credsDao = new CredsDao();
@@ -39,8 +51,9 @@ module.exports = class CredsService {
         if (safe) arr = arr.map(c => packageCredsDocument(c));
         res(arr);
       })
-      .catch(error=>rej(new ServerError()));
-  
+      .catch(error=>{
+        rej(new ServerError())
+      });
     });
   }
   

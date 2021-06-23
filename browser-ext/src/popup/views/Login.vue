@@ -26,7 +26,7 @@
 
 <script>
 import axios from 'axios'
-import OTCForm from '../../components/OTCForm.vue'
+import OTCForm from '../components/OTCForm.vue'
 import { Request, Action } from '../../lib/Messages'
 import Constants from '../../../../model/Constants'
 
@@ -64,6 +64,7 @@ export default {
       })
       .catch(({response}) => {
         console.log(response.data);
+        this.$store.state.alertManager.addAlert({message:response.data});
       })
     },
 
@@ -77,6 +78,7 @@ export default {
       })
       .catch(({response}) => {
         console.log(response.data);
+        this.$store.state.alertManager.addAlert({message:response.data});
       })
     },
 
@@ -91,6 +93,7 @@ export default {
       })
       .catch(({response}) => {
         console.log(response.data);
+        this.$store.state.alertManager.addAlert({message:response.data});
       })
     },
 

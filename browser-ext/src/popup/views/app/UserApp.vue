@@ -142,5 +142,6 @@ methods: {
 
 div#pageContent {
   flex-grow: 1;
+  padding: 1rem;
 }
 </style>

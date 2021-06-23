@@ -31,7 +31,7 @@
 
 <script>
 import axios from 'axios'
-import Spinner from '../../../components/Spinner.vue';
+import Spinner from '../../components/Spinner.vue';
 import Constants from '../../../../../model/Constants'
 
 export default {

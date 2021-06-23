@@ -26,7 +26,7 @@
 
 <script>
 import axios from 'axios'
-import OTCForm from '../../components/OTCForm.vue'
+import OTCForm from '../components/OTCForm.vue'
 import { Request, Action } from '../../lib/Messages'
 import Constants from '../../../../model/Constants'
 

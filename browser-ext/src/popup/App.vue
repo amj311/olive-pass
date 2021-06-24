@@ -6,18 +6,21 @@
     <div v-else class="app-loading">
       <Spinner />
     </div>
+    <AlertDisplay />
   </div>
 </template>
 
 
 <script>
 import axios from 'axios';
-import Spinner from '../components/Spinner.vue';
+import Spinner from './components/Spinner.vue';
+import AlertDisplay from './AlertDisplay.vue';
 
 export default {
   name: 'Home',
   components: {
-    Spinner
+    Spinner,
+    AlertDisplay
   },
   data() { return {
     loading: false,

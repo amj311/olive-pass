@@ -31,7 +31,7 @@
 import axios from 'axios';
 import Login from './Login';
 import Register from './Register';
-import Spinner from '../../components/Spinner.vue';
+import Spinner from '../components/Spinner.vue';
 
 export default {
   name: 'Home',

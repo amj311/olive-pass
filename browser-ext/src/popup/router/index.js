@@ -4,6 +4,8 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import UserApp from '../views/app/UserApp.vue'
 import Creds from '../views/app/Creds.vue'
+import EditCred from '../views/app/EditCred.vue'
+import AddCred from '../views/app/AddCred.vue'
 import EmailConfirm from '../views/app/EmailConfirm.vue'
 import axios from 'axios'
 
@@ -28,6 +30,18 @@ const routes = [
         path: '/',
         name: 'Creds',
         component: Creds,
+      },
+      {
+        path: '/edit-cred',
+        name: 'EditCred',
+        component: EditCred,
+        props: true
+      },
+      {
+        path: '/add-cred',
+        name: 'AddCred',
+        component: AddCred,
+        props: true
       },
     ]
   }

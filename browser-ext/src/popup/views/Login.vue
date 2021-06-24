@@ -18,8 +18,13 @@
     </div>
 
     <div v-if="mode === 'otc'">
-      <p>Login with the one-time code that has been sent to {{previousUser.email}}.</p>
+      <p>
+        Login with the one-time code that has been sent to {{previousUser.email}}.
+        <br>
+        <a @click="startOtc">Send a new code.</a>
+      </p>
       <OTCForm :length="codeLength" :buttonText="'Login'" @submit="attemptOtc" />
+      <p>Or <a @click="setMode('password')">login with password.</a></p>
     </div>
   </div>
 </template>
@@ -47,6 +52,7 @@ export default {
     let req = new Request(Action.GET_STORAGE, 'op-lastUserData');
     chrome.runtime.sendMessage(req, async function(res) {
       ctx.previousUser = res['op-lastUserData'];
+      ctx.lookForOtc();
     });
   },
   methods: {
@@ -65,6 +71,16 @@ export default {
       .catch(({response}) => {
         console.log(response.data);
         this.$store.state.alertManager.addAlert({message:response.data});
+      })
+    },
+
+    lookForOtc() {
+      axios.post(this.$store.state.api_url+"auth/login/otc/find", {
+        userId: this.previousUser._id
+      }, {withCredentials:true})
+      .then(res=>{
+        console.log(res.data)
+        this.setMode("otc");
       })
     },
 
@@ -104,3 +120,13 @@ export default {
   }
 }
 </script>
+
+<style>
+
+a {
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+</style>

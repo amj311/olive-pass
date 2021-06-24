@@ -13,6 +13,14 @@ module.exports = class OTCDao extends Dao {
     return Date.now() > otc.created + otc.exp;
   }
 
+  async findValidCode(uniqueKey) {
+    let otcMatch = await this.findOne({uniqueKey}).then(async (result) => {
+      return result;
+    });
+    if (!otcMatch) throw new ServerError("No match.",404);
+    if (OTCDao.isExpired(otcMatch)) throw new ServerError("OTC Expired",400);
+  }
+
   async newOTC(uniqueKey=null,extras=null) {
     console.log("Searching for previous OTC...")
 

@@ -27,6 +27,13 @@ router.post("/login/otc/new", async (req, res) => {
   })
   .catch(err => HandleError(err,res));
 })
+
+router.post("/login/otc/find", async (req, res) => {
+  AuthService.findOtcLoginForUser(req.body.userId).then(result => {
+    res.sendStatus(200);
+  })
+  .catch(err => HandleError(err,res));
+})
 router.post("/login/otc/attempt", async (req, res) => {
   AuthService.attemptOtcLogin(req.body.userId,req.body.code).then(user => {
     req.session.userId = user._id;

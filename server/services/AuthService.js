@@ -118,7 +118,12 @@ module.exports = class AuthService {
     })
   }
 
-
+  static async findOtcLoginForUser(userId) {
+    let otcDao = getOtcDao();
+    await otcDao.findValidCode(Dao.ObjId(userId)).catch(e=>{
+      throw new ServerError("That code either does not exist or has expired.",404);
+    });
+  }
 
   static async attemptOtcLogin(userId,tryCode) {
     let otcDao = getOtcDao();
@@ -126,7 +131,6 @@ module.exports = class AuthService {
       throw new ServerError("That code either does not exist or has expired.",404);
     });
 
-    
     let userDao = new UserDao();
     let user = await userDao.getById(userId);
     if (!user) throw new ServerError("No such user!",404);

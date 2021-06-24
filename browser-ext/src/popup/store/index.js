@@ -9,7 +9,7 @@ export default new Vuex.Store({
   state: {
     api_url: process.env.NODE_ENV === "development" ?
       `http://localhost:${process.env.PORT || 3000}/api/` :
-      process.env.API_URL,
+      "https://olive-pass.herokuapp.com/api/",
     userData: null,
     alertManager: new AlertManager(),
   },
